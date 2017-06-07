@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::io::Write;
 
 use files::File;
 use errors::*;
@@ -62,6 +63,27 @@ impl Dir {
             subdirs: Vec::new(),
         }
     }
+
+    pub fn write_to<W: Write>(&self, writer: &mut W) -> Result<()> {
+        writeln!(writer, "Dir {{")?;
+        writeln!(writer, r#"    name: "{}","#, self.name)?;
+
+        write!(writer, "    files: vec![")?;
+        for file in &self.files {
+            file.write_to(writer)?;
+        }
+        writeln!(writer, "],")?;
+
+        write!(writer, "    subdirs: vec![")?;
+        for subdir in &self.subdirs {
+            subdir.write_to(writer)?;
+        }
+        writeln!(writer, "],")?;
+
+        writeln!(writer, "}}")?;
+
+        Ok(())
+    }
 }
 
 
@@ -109,4 +131,24 @@ mod tests {
         assert_eq!(dir.subdirs[0].subdirs.len(), 0);
         assert_eq!(dir.subdirs[0].files.len(), 0);
     }
+
+    #[test]
+    fn write_empty_directory_to_string() {
+        let temp = TempDir::new("temp").unwrap();
+        let dir = include_dir(temp.path()).unwrap();
+
+        let mut buffer = Vec::new();
+        dir.write_to(&mut buffer).unwrap();
+
+        let should_be = format!(r#"Dir {{
+    name: "{}",
+    files: vec![],
+    subdirs: vec![],
+}}
+"#,
+                                dir.name);
+
+        assert_eq!(String::from_utf8(buffer).unwrap(), should_be);
+    }
+
 }
