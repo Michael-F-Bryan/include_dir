@@ -1,6 +1,6 @@
 [package]
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
-name = "includedir"
+name = "include_dir"
 version = "0.1.0"
 
 [dependencies]
