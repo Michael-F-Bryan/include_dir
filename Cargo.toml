@@ -10,11 +10,8 @@ categories = ["development-tools", "web-programming", "game-engines"]
 keywords = ["include", "embed", "assets"]
 
 [badges]
-travis-ci = { repository = "https://github.com/Michael-F-Bryan/include_dir", 
-              branch = "master" }
-appveyor = { repository = "https://github.com/Michael-F-Bryan/include_dir", 
-             branch = "master", 
-             service = "github" }
+travis-ci = { repository = "https://github.com/Michael-F-Bryan/include_dir", branch = "master" }
+appveyor = { repository = "https://github.com/Michael-F-Bryan/include_dir", branch = "master", service = "github" }
 
 
 [dependencies]

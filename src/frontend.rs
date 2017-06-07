@@ -21,7 +21,7 @@ pub struct IncludeDirBuilder {
     err: Option<Error>,
 }
 
-/// Embed a file tree.
+/// The entire purpose of this crate.
 ///
 /// This function actually creates a builder object which allows you to
 /// configure the variable name, and where to save it.
