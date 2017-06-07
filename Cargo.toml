@@ -1,0 +1,7 @@
+[package]
+authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
+name = "includedir"
+version = "0.1.0"
+
+[dependencies]
+walkdir = "1.0.7"
