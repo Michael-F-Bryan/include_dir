@@ -7,7 +7,8 @@ dependencies() {
   pip install --user travis-cargo
 
   # travis-pyenv
-  curl https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.3.0/setup-pyenv.sh -sSf | sh
+  wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.3.0/setup-pyenv.sh 
+  ./setup-pyenv.sh
 }
 
 main() {
