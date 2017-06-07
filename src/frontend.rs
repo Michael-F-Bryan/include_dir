@@ -91,8 +91,7 @@ impl IncludeDirBuilder {
 
         serializer
             .dir_as_static(&variable_name, &dir)?
-            .write_file_definition()?
-            .write_dir_definition()?;
+            .write_definitions()?;
 
         Ok(())
     }
