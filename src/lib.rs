@@ -24,9 +24,7 @@ mod frontend;
 pub use errors::*;
 pub use files::File;
 pub use dirs::Dir;
-pub use serializer::Serializer;
 pub use frontend::{include_dir, IncludeDirBuilder};
-
 
 
 mod errors {

@@ -38,7 +38,7 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
-    pub(crate) fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
+    pub fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
         write!(self.writer, "const {}: Dir = ", name)?;
         self.write_dir(d)?;
         writeln!(self.writer, ";")?;
@@ -51,27 +51,29 @@ impl<W> Serializer<W>
 
         for file in d.files() {
             self.write_file(file)?;
+            writeln!(self.writer, ",")?;
         }
 
         write!(self.writer, "], subdirs: &[")?;
         for dir in d.subdirs() {
             self.write_dir(dir)?;
+            writeln!(self.writer, ",")?;
         }
         write!(self.writer, "] }}")?;
 
         Ok(self)
     }
 
-    fn write_file_definition(&mut self) -> Result<&mut Self> {
+    pub fn write_file_definition(&mut self) -> Result<&mut Self> {
         write!(self.writer,
-               "pub struct File {{ name: &'static str, contents: &'static [u8] }}")?;
+               "pub struct File {{ pub name: &'static str, pub contents: &'static [u8] }}")?;
 
         Ok(self)
     }
 
-    fn write_dir_definition(&mut self) -> Result<&mut Self> {
+    pub fn write_dir_definition(&mut self) -> Result<&mut Self> {
         write!(self.writer,
-               "pub struct Dir {{ name: &'static str, files: &'static [File], subdirs: &'static [Dir] }}")?;
+               "pub struct Dir {{ pub name: &'static str, pub files: &'static [File], pub subdirs: &'static [Dir] }}")?;
 
         Ok(self)
     }

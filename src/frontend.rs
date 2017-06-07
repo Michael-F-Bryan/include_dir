@@ -26,7 +26,7 @@ pub struct IncludeDirBuilder {
 ///
 /// # Examples
 ///
-/// ```rust
+/// ```rust,no_run
 /// use std::env;
 /// use std::path::Path;
 /// use include_dir::include_dir;
@@ -34,7 +34,7 @@ pub struct IncludeDirBuilder {
 /// let outdir = env::var("OUT_DIR").unwrap();
 /// let dest_path = Path::new(&outdir).join("assets.rs");
 ///
-/// include_dir("./src")
+/// include_dir("src")
 ///   .as_variable("SRC")
 ///   .to_file(dest_path)
 ///   .unwrap();
@@ -88,8 +88,9 @@ impl IncludeDirBuilder {
         let mut serializer = Serializer::new(f);
 
         serializer
-            .dir_as_const(&variable_name, &dir)
-            .chain_err(|| "Couldn't write the directory tree to the file")?;
+            .dir_as_const(&variable_name, &dir)?
+            .write_file_definition()?
+            .write_dir_definition()?;
 
         Ok(())
     }
