@@ -30,7 +30,7 @@ project_root = Path(os.path.abspath(__file__)).parent
 
 logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s', 
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
 
 BUILD_RS_TEMPLATE = """
 extern crate include_dir;
@@ -75,7 +75,7 @@ def pretty_print_output(output):
 
 class IntegrationTest:
     def __init__(self, filename):
-        self.script = Path(os.path.abspath(filename))
+        self.script = filename.relative_to(project_root)
         self.name = self.script.stem
         self.temp_dir = tempfile.TemporaryDirectory(prefix="include_dir_test-")
         self.crate = None

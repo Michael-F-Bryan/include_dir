@@ -43,7 +43,7 @@ will:
 
 - Create a new `--bin` crate in a temporary directory
 - Copy the `*.rs` file into this new crate and rename it to `main.rs`.
-- Scan the `*.rs` file for a **special** pattern indicating which asset
+- Scan the `*.rs` file for a special pattern indicating which asset
   directory will be included (relative to this crate's root directory). If the
   pattern isn't found, use this crate's `src/` directory.
 - Generate a `build.rs` file which will compile in the specified file tree.

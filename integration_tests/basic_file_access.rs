@@ -6,8 +6,6 @@ fn main() {
     for file in ASSETS.files {
         println!("\t{} ({} bytes)", file.name, file.contents.len());
     }
-
-    panic!();
 }
 
 mod assets {
