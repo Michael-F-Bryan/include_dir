@@ -36,6 +36,21 @@ fn main() {
 ```
 
 
+## Features
+
+- Embed a directory tree into your binary at compile time
+- Find a file in the embedded directory
+- Walk the directory tree, similar to the [walkdir] crate
+
+To-Do list:
+
+- Embed multiple directories without doubling up any struct definitions
+- Ignore items matching a provided pattern
+- File metadata
+- Compression
+- `include_dir!()` proc macro?
+
+
 ## Integration Tests
 
 Because a large part of this crate's functionality depends on generated code,
@@ -53,3 +68,6 @@ will:
   pattern isn't found, use this crate's `src/` directory.
 - Generate a `build.rs` file which will compile in the specified file tree.
 - Compile and run the new binary test crate.
+
+
+[walkdir]: https://docs.rs/walkdir/
