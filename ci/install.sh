@@ -1,6 +1,15 @@
+#!/bin/bash
+
 set -ex
 
+dependencies() {
+  pip install --user ghp-import
+  pip install --user travis-cargo
+}
+
 main() {
+    dependencies
+
     local target=
     if [ $TRAVIS_OS_NAME = linux ]; then
         target=x86_64-unknown-linux-musl
