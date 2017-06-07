@@ -56,7 +56,7 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
-    pub fn write_file_definition(&mut self) -> Result<&mut Self> {
+    fn write_file_definition(&mut self) -> Result<&mut Self> {
         writeln!(self.writer, "/// A static asset")?;
 
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
@@ -74,7 +74,7 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
-    pub fn write_dir_definition(&mut self) -> Result<&mut Self> {
+    fn write_dir_definition(&mut self) -> Result<&mut Self> {
         // docs
         writeln!(self.writer, "/// A directory embedded as a static asset.")?;
 
@@ -108,7 +108,68 @@ impl<W> Serializer<W>
 
                 None
             }
+
+            pub fn walk<'a>(&'a self) -> DirWalker<'a>
+            {
+                DirWalker::new(self)
+            }
         }"#)?;
+
+        Ok(self)
+    }
+
+    fn write_direntry_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer, "#[derive(Debug, PartialEq, Clone)]")?;
+        writeln!(self.writer,
+                 "{}",
+                 "pub enum DirEntry<'a> {
+                     Dir(&'a Dir),
+                     File(&'a File),
+                 }")?;
+
+        Ok(self)
+    }
+
+    fn write_dirwalker_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer, "#[derive(Debug, PartialEq, Clone)]")?;
+        writeln!(self.writer,
+                 "{}",
+                 "pub struct DirWalker<'a> {
+                     root: &'a Dir,
+                     entries_to_visit: ::std::collections::VecDeque<DirEntry<'a>>,
+                 }")?;
+
+        writeln!(self.writer,
+                 "{}",
+                 "impl<'a> DirWalker<'a> {
+                     fn new(root: &'a Dir) -> DirWalker<'a> {
+                         let mut walker = DirWalker{
+                            root: root,
+                            entries_to_visit: ::std::collections::VecDeque::new(),
+                         };
+                         walker.extend_contents(root);
+                         walker
+                     }
+
+                     fn extend_contents(&mut self, from: &Dir) {
+                         for file in from.files {
+                             self.entries_to_visit.push_back(DirEntry::File(file));
+                         }
+
+                         for dir in from.subdirs {
+                             self.entries_to_visit.push_back(DirEntry::Dir(dir));
+                         }
+                     }
+                 }")?;
+
+        Ok(self)
+    }
+
+    pub fn write_definitions(&mut self) -> Result<&mut Self> {
+        self.write_file_definition()?
+            .write_dir_definition()?
+            .write_dirwalker_definition()?
+            .write_direntry_definition()?;
 
         Ok(self)
     }
@@ -230,8 +291,7 @@ mod tests {
 
     compile_and_test!(compile_file_definition, |ser| ser.write_file_definition()?);
 
-    compile_and_test!(compile_dir_definition,
-                      |ser| ser.write_file_definition()?.write_dir_definition()?);
+    compile_and_test!(compile_dir_definition, |ser| ser.write_definitions()?);
 
 
     compile_and_test!(compile_a_dir_and_save_it_as_a_constant, |ser| {
@@ -240,8 +300,6 @@ mod tests {
         let f = include_dir(temp.path())
             .chain_err(|| "Failed to load dummy dir")?;
 
-        ser.dir_as_static("bar", &f)?
-            .write_file_definition()?
-            .write_dir_definition()?;
+        ser.dir_as_static("bar", &f)?.write_definitions()?;
     });
 }
