@@ -20,6 +20,10 @@ impl File {
             None => bail!("Filename is invalid"),
         };
 
+        if !full_name.is_file() {
+            bail!("{} is not a file", full_name.display());
+        }
+
         let mut contents = Vec::new();
         fs::File::open(&full_name)?.read_to_end(&mut contents)?;
 
@@ -31,7 +35,6 @@ impl File {
     /// This representation **must** be valid Rust code and result in an
     /// identical version to the original!
     pub fn write_to<W: Write>(&self, writer: &mut W) -> Result<()> {
-        // FIXME: We shouldn't rely on the `Debug` representation here
         writeln!(writer, "File {{")?;
         writeln!(writer, "    name: {:?},", self.name)?;
         writeln!(writer, "    contents: vec!{:?},", self.contents)?;
@@ -45,6 +48,7 @@ mod tests {
     use super::*;
     use std::io::{Seek, SeekFrom, Read};
     use tempfile::NamedTempFile;
+    use tempdir::TempDir;
 
     fn dummy_file() -> (PathBuf, NamedTempFile) {
         let mut temp = NamedTempFile::new().unwrap();
@@ -87,5 +91,12 @@ mod tests {
         file.write_to(&mut buffer).unwrap();
 
         assert_eq!(String::from_utf8(buffer).unwrap(), should_be);
+    }
+
+    #[test]
+    fn file_only_works_on_files() {
+        let t = TempDir::new("blah").unwrap();
+
+        assert!(File::new(t.path()).is_err());
     }
 }
