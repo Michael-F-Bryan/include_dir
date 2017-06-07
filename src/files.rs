@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 use std::fs;
-use std::io::Read;
+use std::io::{Write, Read};
 
 use errors::*;
 
@@ -25,33 +25,67 @@ impl File {
 
         Ok(File { name, contents })
     }
+
+    /// Writes a representation of the `File` to some writer.
+    ///
+    /// This representation **must** be valid Rust code and result in an
+    /// identical version to the original!
+    pub fn write_to<W: Write>(&self, writer: &mut W) -> Result<()> {
+        // FIXME: We shouldn't rely on the `Debug` representation here
+        writeln!(writer, "File {{")?;
+        writeln!(writer, "    name: {:?},", self.name)?;
+        writeln!(writer, "    contents: vec!{:?},", self.contents)?;
+        writeln!(writer, "}}")?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env;
-    use std::fs;
-    use std::io::Read;
+    use std::io::{Seek, SeekFrom, Read};
+    use tempfile::NamedTempFile;
 
-    fn this_binary() -> (PathBuf, fs::File) {
-        let filename = env::args().next().unwrap();
-        let f = fs::File::open(&filename).unwrap();
+    fn dummy_file() -> (PathBuf, NamedTempFile) {
+        let mut temp = NamedTempFile::new().unwrap();
 
-        (PathBuf::from(filename), f)
+        write!(temp, "Hello World!").unwrap();
+        temp.seek(SeekFrom::Start(0)).unwrap();
+
+        (PathBuf::from(temp.path()), temp)
     }
 
     #[test]
     fn new_file() {
-        let (this, mut f) = this_binary();
+        let (path, mut f) = dummy_file();
 
-        let file = File::new(&this).unwrap();
+        let file = File::new(&path).unwrap();
 
         let mut file_contents = Vec::new();
         f.read_to_end(&mut file_contents).unwrap();
 
-        assert_eq!(file.contents, &file_contents[..]);
+        assert_eq!(file.contents, file_contents);
         assert_eq!(file.name,
-                   this.file_name().and_then(|s| s.to_str()).unwrap());
+                   path.file_name().and_then(|s| s.to_str()).unwrap());
+    }
+
+    #[test]
+    fn check_static_representation() {
+        let (path, mut f) = dummy_file();
+
+        let should_be = format!(r#"File {{
+    name: "{}",
+    contents: vec!{:?},
+}}
+"#,
+                                path.file_name().and_then(|s| s.to_str()).unwrap(),
+                                "Hello World!".as_bytes());
+
+        let file = File::new(&path).unwrap();
+
+        let mut buffer = Vec::new();
+        file.write_to(&mut buffer).unwrap();
+
+        assert_eq!(String::from_utf8(buffer).unwrap(), should_be);
     }
 }

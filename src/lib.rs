@@ -2,6 +2,9 @@
 extern crate error_chain;
 extern crate walkdir;
 
+#[cfg(test)]
+extern crate tempfile;
+
 mod files;
 
 pub use errors::*;

@@ -6,3 +6,6 @@ version = "0.1.0"
 [dependencies]
 error-chain = "0.10.0"
 walkdir = "1.0.7"
+
+[dev-dependencies]
+tempfile = "2.1.5"
