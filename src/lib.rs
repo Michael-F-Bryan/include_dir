@@ -19,11 +19,14 @@ extern crate tempdir;
 mod files;
 mod dirs;
 mod serializer;
+mod frontend;
 
 pub use errors::*;
 pub use files::File;
-pub use dirs::{include_dir, Dir};
+pub use dirs::Dir;
 pub use serializer::Serializer;
+pub use frontend::{include_dir, IncludeDirBuilder};
+
 
 
 mod errors {

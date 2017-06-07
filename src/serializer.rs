@@ -38,7 +38,7 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
-    fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
+    pub(crate) fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
         write!(self.writer, "const {}: Dir = ", name)?;
         self.write_dir(d)?;
         writeln!(self.writer, ";")?;
