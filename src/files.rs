@@ -41,6 +41,14 @@ impl File {
         writeln!(writer, "}}")?;
         Ok(())
     }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn contents(&self) -> &[u8] {
+        &self.contents
+    }
 }
 
 #[cfg(test)]
