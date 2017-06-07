@@ -18,7 +18,7 @@ mod dirs;
 
 pub use errors::*;
 pub use files::File;
-pub use dirs::Dir;
+pub use dirs::{include_dir, Dir};
 
 
 mod errors {

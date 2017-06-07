@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use std::io::Write;
 
 use files::File;
 use errors::*;
@@ -8,7 +7,7 @@ use errors::*;
 pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
     let full_name = PathBuf::from(root.as_ref());
     let name = match full_name.file_name().and_then(|s| s.to_str()) {
-        Some(ref s) => s.to_string(),
+        Some(s) => s.to_string(),
         None => bail!("Directory name is invalid"),
     };
 
@@ -33,7 +32,7 @@ fn dirs_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<Dir>> {
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|p| p.is_dir())
-        .map(|p| include_dir(p))
+        .map(include_dir)
         .collect()
 }
 
@@ -43,7 +42,7 @@ fn files_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<File>> {
         .filter_map(|dir_entry| dir_entry.ok())
         .map(|dir_entry| dir_entry.path())
         .filter(|p| p.is_file())
-        .map(|p| File::new(p))
+        .map(File::new)
         .collect()
 }
 
@@ -56,33 +55,16 @@ pub struct Dir {
 
 
 impl Dir {
-    fn new<S: AsRef<str>>(dirname: S) -> Dir {
-        Dir {
-            name: dirname.as_ref().to_string(),
-            files: Vec::new(),
-            subdirs: Vec::new(),
-        }
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
-    pub fn write_to<W: Write>(&self, writer: &mut W) -> Result<()> {
-        writeln!(writer, "Dir {{")?;
-        writeln!(writer, r#"    name: "{}","#, self.name)?;
+    pub fn files(&self) -> &[File] {
+        &self.files
+    }
 
-        write!(writer, "    files: vec![")?;
-        for file in &self.files {
-            file.write_to(writer)?;
-        }
-        writeln!(writer, "],")?;
-
-        write!(writer, "    subdirs: vec![")?;
-        for subdir in &self.subdirs {
-            subdir.write_to(writer)?;
-        }
-        writeln!(writer, "],")?;
-
-        writeln!(writer, "}}")?;
-
-        Ok(())
+    pub fn subdirs(&self) -> &[Dir] {
+        &self.subdirs
     }
 }
 
@@ -93,8 +75,7 @@ mod tests {
     use tempfile::NamedTempFile;
     use tempdir::TempDir;
     use std::fs;
-    use std::io::{Read, Seek, SeekFrom, Write};
-    use std::process::{Command, Output};
+    use std::io::Write;
 
     #[test]
     fn dir_only_works_on_directories() {
@@ -122,7 +103,7 @@ mod tests {
     #[test]
     fn get_sub_directories() {
         let root = TempDir::new("temp").unwrap();
-        let child = TempDir::new_in(root.path(), "child").unwrap();
+        let _child = TempDir::new_in(root.path(), "child").unwrap();
 
         let dir = include_dir(root.path()).unwrap();
 
@@ -132,50 +113,4 @@ mod tests {
         assert_eq!(dir.subdirs[0].subdirs.len(), 0);
         assert_eq!(dir.subdirs[0].files.len(), 0);
     }
-
-    #[test]
-    fn write_empty_directory_to_string() {
-        let temp = TempDir::new("temp").unwrap();
-        let dir = include_dir(temp.path()).unwrap();
-
-        let mut buffer = Vec::new();
-        dir.write_to(&mut buffer).unwrap();
-
-        let should_be = format!(r#"Dir {{
-    name: "{}",
-    files: vec![],
-    subdirs: vec![],
-}}
-"#,
-                                dir.name);
-
-        assert_eq!(String::from_utf8(buffer).unwrap(), should_be);
-    }
-
-    #[test]
-    #[ignore]
-    fn make_sure_dir_compiles() {
-        let mut temp = NamedTempFile::new().unwrap();
-
-        let dir = include_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/src")).unwrap();
-
-        dir.write_to(&mut temp).unwrap();
-
-        let output = compile(temp.path()).unwrap();
-        println!("{:?}", output);
-
-        let mut buffer = Vec::new();
-        temp.seek(SeekFrom::Start(0)).unwrap();
-        temp.read_to_end(&mut buffer).unwrap();
-        println!("{}", String::from_utf8(buffer).unwrap());
-        panic!();
-    }
-
-    fn compile<P: AsRef<Path>>(s: P) -> Result<Output> {
-        Command::new("rustc")
-            .arg(s.as_ref().to_str().unwrap())
-            .output()
-            .map_err(|e| e.into())
-    }
-
 }
