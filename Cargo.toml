@@ -4,4 +4,5 @@ name = "includedir"
 version = "0.1.0"
 
 [dependencies]
+error-chain = "0.10.0"
 walkdir = "1.0.7"
