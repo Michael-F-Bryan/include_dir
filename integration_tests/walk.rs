@@ -6,7 +6,12 @@ fn main() {
     let mut number_of_dirs = 0;
 
     for entry in ASSETS.walk() {
-        println!("{}", entry.name);
+        println!("{}", entry.name());
+
+        match entry {
+            DirEntry::Dir(_) => number_of_dirs += 1,
+            DirEntry::File(_) => number_of_files += 1,
+        }
     }
 }
 

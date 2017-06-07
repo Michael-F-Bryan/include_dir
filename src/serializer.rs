@@ -127,6 +127,18 @@ impl<W> Serializer<W>
                      File(&'a File),
                  }")?;
 
+        writeln!(self.writer,
+                 "{}",
+                 "impl<'a> DirEntry<'a> {
+                     /// Get the entry's name.
+                     pub fn name(&self) -> &str {
+                         match *self {
+                             DirEntry::Dir(d) => d.name,
+                             DirEntry::File(f) => f.name,
+                         }
+                     }
+                 }")?;
+
         Ok(self)
     }
 
@@ -161,6 +173,23 @@ impl<W> Serializer<W>
                          }
                      }
                  }")?;
+
+        writeln!(self.writer,
+                 "{}",
+                 "impl<'a> Iterator for DirWalker<'a> {
+                    type Item = DirEntry<'a>;
+
+                    fn next(&mut self) -> Option<Self::Item> {
+                        let entry = self.entries_to_visit.pop_front();
+
+                        if let Some(DirEntry::Dir(d)) = entry {
+                            self.extend_contents(d);
+                            Some(DirEntry::Dir(d))
+                        } else {
+                            entry
+                        }
+                    }
+                }")?;
 
         Ok(self)
     }
