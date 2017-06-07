@@ -81,7 +81,7 @@ class IntegrationTest:
         self.crate = None
 
     def initialize(self):
-        logging.info("Initializing test crate in %s", self.temp_dir.name)
+        logging.debug("Initializing test crate in %s", self.temp_dir.name)
         crate_name = self.name
 
         output = subprocess.run(["cargo", "new", "--bin", crate_name],
@@ -103,9 +103,7 @@ class IntegrationTest:
         self.copy_across_cache()
 
     def run(self):
-        logging.info('Running test "%s" in "%s"', 
-                     self.name, 
-                     self.temp_dir.name)
+        logging.info('Running test "%s"', self.name)
 
         output = subprocess.run(["cargo", "run", "--verbose"],
                        cwd=self.crate,
@@ -122,7 +120,7 @@ class IntegrationTest:
 
     def generate_build_rs(self):
         asset_dir = self.assets_to_embed()
-        logging.info("Generating build.rs (assets: %s)", asset_dir)
+        logging.debug("Generating build.rs (assets: %s)", asset_dir)
 
         build_rs = self.crate / "build.rs"
 
@@ -130,7 +128,7 @@ class IntegrationTest:
             f.write(BUILD_RS_TEMPLATE.format(asset_dir))
 
     def update_cargo_toml(self):
-        logging.info("Updating Cargo.toml")
+        logging.debug("Updating Cargo.toml")
         cargo_toml = self.crate / "Cargo.toml"
 
         with open(cargo_toml, "w") as f:
@@ -148,7 +146,7 @@ class IntegrationTest:
                 return Path(abspath(got.groups(1)))
 
     def copy_across_cache(self):
-        logging.info('Copying across "target/" dir')
+        logging.debug('Copying across "target/" dir')
         shutil.copytree(project_root / "target", self.crate / "target")
 
     def __repr__(self):

@@ -39,7 +39,7 @@ impl<W> Serializer<W>
     }
 
     pub fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
-        write!(self.writer, "const {}: Dir = ", name)?;
+        write!(self.writer, "pub const {}: Dir = ", name)?;
         self.write_dir(d)?;
         writeln!(self.writer, ";")?;
 
@@ -65,6 +65,7 @@ impl<W> Serializer<W>
     }
 
     pub fn write_file_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
         write!(self.writer,
                "pub struct File {{ pub name: &'static str, pub contents: &'static [u8] }}")?;
 
@@ -72,8 +73,9 @@ impl<W> Serializer<W>
     }
 
     pub fn write_dir_definition(&mut self) -> Result<&mut Self> {
-        write!(self.writer,
-               "pub struct Dir {{ pub name: &'static str, pub files: &'static [File], pub subdirs: &'static [Dir] }}")?;
+        writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
+        writeln!(self.writer,
+                 "pub struct Dir {{ pub name: &'static str, pub files: &'static [File], pub subdirs: &'static [Dir] }}")?;
 
         Ok(self)
     }
