@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "cargo-clippy", allow(wrong_self_convention))]
+
 use std::path::Path;
 use std::fs::File;
 
@@ -11,7 +13,7 @@ use errors::*;
 /// # Note
 ///
 /// It is pretty much assumed that you'll use it in the order described in
-/// include_dir's docs. Straying from that path will only lead to frustration.
+/// `include_dir`'s docs. Straying from that path will only lead to frustration.
 #[derive(Debug)]
 pub struct IncludeDirBuilder {
     dir: Option<Dir>,

@@ -21,13 +21,13 @@ impl<W> Serializer<W>
         Serializer { writer }
     }
 
-    fn file_as_const(&mut self, name: &str, f: &File) -> Result<&mut Self> {
-        write!(self.writer, "const {}: File = ", name)?;
-        self.write_file(f)?;
-        writeln!(self.writer, ";")?;
+    // fn file_as_const(&mut self, name: &str, f: &File) -> Result<&mut Self> {
+    //     write!(self.writer, "const {}: File = ", name)?;
+    //     self.write_file(f)?;
+    //     writeln!(self.writer, ";")?;
 
-        Ok(self)
-    }
+    //     Ok(self)
+    // }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
         write!(self.writer,
@@ -85,9 +85,9 @@ mod tests {
     use super::*;
     use std::process::{Command, Output};
     use std::fs;
+    use std::path::Path;
     use tempdir::TempDir;
     use tempfile::NamedTempFile;
-    use files::include_file;
     use dirs::include_dir;
 
     macro_rules! compile_and_test {
@@ -148,8 +148,8 @@ mod tests {
             .map(|o| (o, dir))
     }
 
-    fn dummy_file() -> NamedTempFile {
-        let mut temp = NamedTempFile::new().unwrap();
+    fn dummy_file(parent: &Path) -> NamedTempFile {
+        let mut temp = NamedTempFile::new_in(parent).unwrap();
         write!(temp, "Hello World!").unwrap();
 
         temp
@@ -159,8 +159,7 @@ mod tests {
         let root = TempDir::new("temp").unwrap();
 
         if with_children {
-            let mut f = fs::File::create(root.path().join("main.rs")).unwrap();
-            write!(f, "Hello World!").unwrap();
+            dummy_file(root.path());
 
             TempDir::new_in(root.path(), "child").unwrap();
         }
@@ -200,18 +199,8 @@ mod tests {
                       |ser| ser.write_file_definition()?.write_dir_definition()?);
 
 
-    compile_and_test!(compile_a_file_and_save_it_as_a_constant, |ser| {
-        let mut temp = dummy_file();
-
-        let f = include_file(temp.path())
-            .chain_err(|| "Failed to read in dummy file")?;
-
-        ser.file_as_const("foo", &f)?;
-        ser.write_file_definition()?;
-    });
-
     compile_and_test!(compile_a_dir_and_save_it_as_a_constant, |ser| {
-        let mut temp = dummy_dir(false);
+        let temp = dummy_dir(false);
 
         let f = include_dir(temp.path())
             .chain_err(|| "Failed to load dummy dir")?;
