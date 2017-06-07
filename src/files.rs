@@ -13,6 +13,10 @@ pub struct File {
 
 
 impl File {
+    fn definition() -> &'static str {
+        "pub struct File { name: &'static str, contents: &'static [u8], }"
+    }
+
     pub fn new<P: AsRef<Path>>(filename: P) -> Result<File> {
         let full_name = PathBuf::from(filename.as_ref());
         let name = match full_name.file_name().and_then(|s| s.to_str()) {
@@ -37,7 +41,7 @@ impl File {
     pub fn write_to<W: Write>(&self, writer: &mut W) -> Result<()> {
         writeln!(writer, "File {{")?;
         writeln!(writer, "    name: {:?},", self.name)?;
-        writeln!(writer, "    contents: vec!{:?},", self.contents)?;
+        writeln!(writer, "    contents: &{:?},", self.contents)?;
         writeln!(writer, "}}")?;
         Ok(())
     }
@@ -55,6 +59,7 @@ impl File {
 mod tests {
     use super::*;
     use std::io::{Seek, SeekFrom, Read};
+    use std::process::{Command, Output};
     use tempfile::NamedTempFile;
     use tempdir::TempDir;
 
@@ -107,4 +112,35 @@ mod tests {
 
         assert!(File::new(t.path()).is_err());
     }
+
+    #[test]
+    fn make_sure_file_compiles() {
+        let (path, _f) = dummy_file();
+        let file = File::new(&path).unwrap();
+
+        let output_dir = TempDir::new("temp").unwrap();
+        let mut temp_output = fs::File::create(output_dir.path().join("main.rs")).unwrap();
+
+        writeln!(temp_output, "{}", File::definition());
+        write!(temp_output, "const FILE: File = ");
+        file.write_to(&mut temp_output).unwrap();
+        write!(temp_output, ";");
+
+        let output = compile(output_dir.path().join("main.rs")).unwrap();
+        println!("{:?}", output);
+
+        let mut buffer = Vec::new();
+        temp_output.seek(SeekFrom::Start(0)).unwrap();
+        temp_output.read_to_end(&mut buffer).unwrap();
+        println!("{}", String::from_utf8(buffer).unwrap());
+        panic!();
+    }
+
+    fn compile<P: AsRef<Path>>(s: P) -> Result<Output> {
+        Command::new("rustc")
+            .arg(s.as_ref().to_str().unwrap())
+            .output()
+            .map_err(|e| e.into())
+    }
+
 }
