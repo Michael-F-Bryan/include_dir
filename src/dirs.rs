@@ -153,6 +153,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn make_sure_dir_compiles() {
         let mut temp = NamedTempFile::new().unwrap();
 

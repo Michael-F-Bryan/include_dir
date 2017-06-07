@@ -114,6 +114,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn make_sure_file_compiles() {
         let (path, _f) = dummy_file();
         let file = File::new(&path).unwrap();
