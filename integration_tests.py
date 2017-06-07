@@ -105,7 +105,7 @@ class IntegrationTest:
     def run(self):
         logging.info('Running test "%s"', self.name)
 
-        output = subprocess.run(["cargo", "run", "--verbose"],
+        output = subprocess.run(["cargo", "run"],
                        cwd=self.crate,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)

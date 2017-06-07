@@ -21,14 +21,6 @@ impl<W> Serializer<W>
         Serializer { writer }
     }
 
-    // fn file_as_const(&mut self, name: &str, f: &File) -> Result<&mut Self> {
-    //     write!(self.writer, "const {}: File = ", name)?;
-    //     self.write_file(f)?;
-    //     writeln!(self.writer, ";")?;
-
-    //     Ok(self)
-    // }
-
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
         write!(self.writer,
                r#"File {{ name: "{}", contents: &{:?} }}"#,
@@ -38,8 +30,8 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
-    pub fn dir_as_const(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
-        write!(self.writer, "pub const {}: Dir = ", name)?;
+    pub fn dir_as_static(&mut self, name: &str, d: &Dir) -> Result<&mut Self> {
+        write!(self.writer, "pub static {}: Dir = ", name)?;
         self.write_dir(d)?;
         writeln!(self.writer, ";")?;
 
@@ -65,17 +57,58 @@ impl<W> Serializer<W>
     }
 
     pub fn write_file_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer, "/// A static asset")?;
+
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
-        write!(self.writer,
-               "pub struct File {{ pub name: &'static str, pub contents: &'static [u8] }}")?;
+        writeln!(self.writer,
+                 "pub struct File {{
+                    pub name: &'static str,
+                    pub contents: &'static [u8]
+                }}")?;
+
+        // writeln!(self.writer, "{}",
+        //          "impl File {
+        //              fn as_string(&self) -> Result<
+        //          }")?;
 
         Ok(self)
     }
 
     pub fn write_dir_definition(&mut self) -> Result<&mut Self> {
+        // docs
+        writeln!(self.writer, "/// A directory embedded as a static asset.")?;
+
+        // struct definition
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
         writeln!(self.writer,
-                 "pub struct Dir {{ pub name: &'static str, pub files: &'static [File], pub subdirs: &'static [Dir] }}")?;
+                 "pub struct Dir {{
+                    pub name: &'static str,
+                    pub files: &'static [File],
+                    pub subdirs: &'static [Dir]
+                  }}")?;
+
+        // method impls
+        writeln!(self.writer,
+                 "{}",
+                 r#"
+        impl Dir {
+            /// Find a file which *exactly* matches the provided name.
+            pub fn find(&'static self, name: &str) -> Option<&'static File> {
+                for file in self.files {
+                    if file.name == name {
+                        return Some(file);
+                    }
+                }
+
+                for dir in self.subdirs {
+                    if let Some(f) = dir.find(name) {
+                        return Some(f);
+                    }
+                }
+
+                None
+            }
+        }"#)?;
 
         Ok(self)
     }
@@ -207,7 +240,7 @@ mod tests {
         let f = include_dir(temp.path())
             .chain_err(|| "Failed to load dummy dir")?;
 
-        ser.dir_as_const("bar", &f)?
+        ser.dir_as_static("bar", &f)?
             .write_file_definition()?
             .write_dir_definition()?;
     });

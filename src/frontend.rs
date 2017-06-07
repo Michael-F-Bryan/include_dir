@@ -90,7 +90,7 @@ impl IncludeDirBuilder {
         let mut serializer = Serializer::new(f);
 
         serializer
-            .dir_as_const(&variable_name, &dir)?
+            .dir_as_static(&variable_name, &dir)?
             .write_file_definition()?
             .write_dir_definition()?;
 
