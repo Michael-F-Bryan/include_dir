@@ -15,14 +15,25 @@ pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
         bail!("{} is not a directory", full_name.display());
     }
 
-    let subdirs = Vec::new();
+
     let files = files_in_dir(&full_name)?;
+    let subdirs = dirs_in_dir(&full_name)?;
 
     Ok(Dir {
            name,
            subdirs,
            files,
        })
+}
+
+fn dirs_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<Dir>> {
+    root.as_ref()
+        .read_dir()?
+        .filter_map(|entry| entry.ok())
+        .map(|entry| entry.path())
+        .filter(|p| p.is_dir())
+        .map(|p| include_dir(p))
+        .collect()
 }
 
 fn files_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<File>> {
@@ -83,5 +94,19 @@ mod tests {
 
         assert_eq!(got_files.len(), 1);
         assert_eq!(got_files[0].name(), "file_1.txt");
+    }
+
+    #[test]
+    fn get_sub_directories() {
+        let root = TempDir::new("temp").unwrap();
+        let child = TempDir::new_in(root.path(), "child").unwrap();
+
+        let dir = include_dir(root.path()).unwrap();
+
+        assert_eq!(dir.files.len(), 0);
+        assert_eq!(dir.subdirs.len(), 1);
+
+        assert_eq!(dir.subdirs[0].subdirs.len(), 0);
+        assert_eq!(dir.subdirs[0].files.len(), 0);
     }
 }
