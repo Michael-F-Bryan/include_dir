@@ -16,7 +16,6 @@ appveyor = { repository = "https://github.com/Michael-F-Bryan/include_dir", bran
 
 [dependencies]
 error-chain = "0.10.0"
-walkdir = "1.0.7"
 
 [dev-dependencies]
 tempdir = "0.3.5"
