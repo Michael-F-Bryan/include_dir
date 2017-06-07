@@ -139,7 +139,7 @@ class IntegrationTest:
         # Search for the "special" pattern -> include_dir!("path/to/assets")
         pattern = re.compile(r'include_dir!\("([\w\d./]+)"\)')
 
-        with open(self.script) as f:
+        with open(self.script.as_posix()) as f:
             got = pattern.search(f.read())
             if got is None:
                 return project_root / "src"

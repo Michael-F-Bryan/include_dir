@@ -1,6 +1,8 @@
 dist: trusty
 language: rust
 services: docker
+python: 
+  - "3.6"
 sudo: required
 env:
   global:
