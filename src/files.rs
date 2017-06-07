@@ -92,7 +92,7 @@ mod tests {
 
         let should_be = format!(r#"File {{
     name: "{}",
-    contents: vec!{:?},
+    contents: &{:?},
 }}
 "#,
                                 path.file_name().and_then(|s| s.to_str()).unwrap(),
