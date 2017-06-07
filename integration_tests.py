@@ -61,16 +61,16 @@ include_dir = {{path = "{}"}}
 """
 
 def pretty_print_output(output):
-    logging.debug("return code: %d", output.returncode)
+    logging.warn("return code: %d", output.returncode)
     if output.stdout:
-        logging.debug("stdout:")
+        logging.warn("stdout:")
         for line in output.stdout.decode().split("\n"):
-            logging.debug("%s", line)
+            logging.warn("%s", line)
 
     if output.stderr:
-        logging.debug("stderr:")
+        logging.warn("stderr:")
         for line in output.stderr.decode().split("\n"):
-            logging.debug("%s", line)
+            logging.warn("%s", line)
 
 
 class IntegrationTest:
@@ -96,7 +96,8 @@ class IntegrationTest:
 
         self.crate = Path(self.temp_dir.name) / crate_name
 
-        shutil.copy(self.script, self.crate / "src" / "main.rs")
+        main_rs = self.crate / "src" / "main.rs"
+        shutil.copy(self.script, main_rs.as_posix())
 
         self.generate_build_rs()
         self.update_cargo_toml()

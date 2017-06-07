@@ -1,6 +1,7 @@
 # include_dir
 
 [![Build Status](https://travis-ci.org/Michael-F-Bryan/include_dir.svg?branch=master)](https://travis-ci.org/Michael-F-Bryan/include_dir)
+[![Build status](https://ci.appveyor.com/api/projects/status/3a4actkllivtsytk?svg=true)](https://ci.appveyor.com/project/Michael-F-Bryan/include-dir)
 
 
 An extension to the `include_str!()` macro for embedding an entire directory
