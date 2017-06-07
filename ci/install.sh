@@ -5,10 +5,6 @@ set -ex
 dependencies() {
   pip install --user ghp-import
   pip install --user travis-cargo
-
-  # travis-pyenv
-  wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.3.0/setup-pyenv.sh 
-  bash ./setup-pyenv.sh
 }
 
 main() {
