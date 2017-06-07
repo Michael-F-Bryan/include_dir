@@ -1,5 +1,8 @@
 # include_dir
 
+[![Build Status](https://travis-ci.org/Michael-F-Bryan/include_dir.svg?branch=master)](https://travis-ci.org/Michael-F-Bryan/include_dir)
+
+
 An extension to the `include_str!()` macro for embedding an entire directory
 tree into your binary.
 
