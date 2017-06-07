@@ -1,44 +1,33 @@
-# Based on the "trust" template v0.1.1
-# https://github.com/japaric/trust/tree/v0.1.1
-
 dist: trusty
 language: rust
 services: docker
 sudo: required
-
 env:
   global:
-    - CRATE_NAME=include_dir
-    - secure: KYlhj8S0cH4AT1fkrecOIMmJrvnC3nUDQZ+fTtstVvm+rrV6KqwRqy6WfekRNq3Le6S7SsH5SyyJFfdFFkHVtpUSnYvd2pxy7mrYpgFba/9vJxndJYSqI6TuxJ5tx+HxouCEFVNZg8f1De+RtGayD2f4xOixRbSHQO3kzH2Cz0pzTBMas5cfveImjHwc+abwp/tp0VKgCz/91V698/cDC0RWVX6aUSe3z1lBN/mmnqXLiDLqcT1xlQqq5JJZ2SjCnLoSnwqMPZzWGBIxz9mvqsE9531pgj1YWYUkQGGNLotwdrpkRhTALVTZJBoKcDqN9rAvdIrw32ufJ2RwO6AjBonurCcZwCYzGDxSulyjrXchKN+hPQ/qpz5kwAh8o9vLfExVYP/gKaDTKVAiva8Zdi3tT/8WYhXm2P+UH2U4qFuhgYxr/bi/HIsVqPRgurKtgK0keCHh+h6VqGOpy49Td9r3uCzWdCiC2vawThQEPNl3NF0BhA5mpQkEEtAcO7tKagvptBaZTLP1gxtT1eTcYvWypff4Eo3m1TXFf4dkKk23gblK9UAzdbqrH0WqFWLLyHv+vwCNA6hdV4BfiiS/dseuB/66tQ6so3vwoVcTyPEy9U1cFzCxu64J1OcmTY1h72fToAiBNjoDevzofbZPduQruVYLqZj74e1tvl4xPOM=
-
+  - CRATE_NAME=include_dir
+  - secure: WuvfmNkBy4tn9cF/M0Vk6/+b+/xDH1niGz6K7JMFJHyNq5IrQZzwqw12cv1kk5GaIDE1IJtt+XVfZoDMwnncHpKYtyCZN/SM0X36WJaYM7IVb5MdrcGqUCqNQNn8TCi/c+qXThBT8dtm5xj8U3J34WphoUohkwSYG0D4nP+ucYOKIhOA9MlJ41+wC6rSX95Iw2CWErvRcT6gkRAaEduvxEJ1sFt8Zz2XwbZ+JYzXhYZGYc9Q//toHD10bXNGiwrV7fNiceu4+QGrdNJJb7dD9tQFAUd08lsNXzlYIacWYt8mK3rE/4tZLghvDNcLLCTr8UZf1ok1mbVthdjsU5paqt0x/vpvZapWbbRI89pZTHc+12hp9e0FDPWnZPAWMWJcC50gmcODkxaM1hxMRPTce0jVObkK06T10EkX3fmk+hF1QgF0mSrSgHHGJXCXS/U4n69uwREYVnCcLFTqK4Lol8fTGf8iTuPHM83xViZ2w5N10eemd4Rw3nBW86GCIaa9YqR+FdgEtz2Ns1nyfgAnCXMvbZ8DP2ltxi0vJmlcpdE5UOZHmb5nmVS65/w9aEPFJ9+fFZmuYExLykUXqyXrYBEP1p5mzXt1nPJPGmIlR+Ic32zGaTWaaEoMS4XbXLdqM6VU+YjO6tYnhv631LureW8yRyfRyj+J3OWt2r30mO0=
 matrix:
   include:
-    - env: TARGET=i686-unknown-linux-gnu
-    - env: TARGET=x86_64-apple-darwin
-      os: osx
-    - env: TARGET=x86_64-unknown-linux-gnu
-      rust: nightly
+  - env: TARGET=i686-unknown-linux-gnu
+  - env: TARGET=x86_64-apple-darwin
+    os: osx
+  - env: TARGET=x86_64-unknown-linux-gnu
+    rust: nightly
   allow_failures:
-    - env: TARGET=x86_64-apple-darwin
-      os: osx
-
+  - env: TARGET=x86_64-apple-darwin
+    os: osx
 before_install: set -e
-
 install:
-  - sh ci/install.sh
-  - source ~/.cargo/env || true
-
+- sh ci/install.sh
+- source ~/.cargo/env || true
 script:
-  - bash ci/script.sh
-
-after_script: 
-  - set +e
-  - ci/deploy.sh
-
+- bash ci/script.sh
+after_script:
+- set +e
+- ci/deploy.sh
 cache: cargo
 before_cache:
-  - chmod -R a+r $HOME/.cargo
-
+- chmod -R a+r $HOME/.cargo
 notifications:
   email:
     on_success: never
