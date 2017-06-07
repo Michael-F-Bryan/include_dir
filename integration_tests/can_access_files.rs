@@ -1,9 +1,8 @@
-extern crate include_dir;
+
+fn main() {
+    println!("{:?}", assets::ASSETS.files);
+}
 
 mod assets {
     include!(concat!(env!("OUT_DIR"), "/assets.rs"));
-}
-
-fn main() {
-    println!("{:?}", assets::ASSETS.files());
 }

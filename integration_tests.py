@@ -24,10 +24,11 @@ import tempfile
 import logging
 import shutil
 import re
+import time
 
 project_root = Path(os.path.abspath(__file__)).parent
 
-logging.basicConfig(format='%(asctime)s %(levelname)7s: %(message)s', 
+logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s', 
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG)
 
@@ -55,20 +56,33 @@ authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
 name = "{}"
 version = "0.1.0"
 
-[dependencies]
+[build-dependencies]
 include_dir = {{path = "{}"}}
 """
+
+def pretty_print_output(output):
+    logging.debug("return code: %d", output.returncode)
+    if output.stdout:
+        logging.debug("stdout:")
+        for line in output.stdout.decode().split("\n"):
+            logging.debug("%s", line)
+
+    if output.stderr:
+        logging.debug("stderr:")
+        for line in output.stderr.decode().split("\n"):
+            logging.debug("%s", line)
 
 
 class IntegrationTest:
     def __init__(self, filename):
         self.script = Path(os.path.abspath(filename))
-        self.temp_dir = tempfile.TemporaryDirectory()
+        self.name = self.script.stem
+        self.temp_dir = tempfile.TemporaryDirectory(prefix="include_dir_test-")
         self.crate = None
 
     def initialize(self):
         logging.info("Initializing test crate in %s", self.temp_dir.name)
-        crate_name = self.script.stem
+        crate_name = self.name
 
         output = subprocess.run(["cargo", "new", "--bin", crate_name],
                        cwd=self.temp_dir.name,
@@ -76,35 +90,51 @@ class IntegrationTest:
                        stderr=subprocess.PIPE)
 
         if output.returncode != 0:
-            logging.warn("Got non-zero return code, %d", output.returncode)
-            logging.debug("stdout: %s", output.stdout.decode())
-            logging.debug("stderr: %s", output.stderr.decode())
+            logging.error("Unable to create a new crate")
+            pretty_print_output(output)
             return
 
         self.crate = Path(self.temp_dir.name) / crate_name
 
         shutil.copy(self.script, self.crate / "src" / "main.rs")
 
+        self.generate_build_rs()
+        self.update_cargo_toml()
+        self.copy_across_cache()
+
+    def run(self):
+        logging.info('Running test "%s" in "%s"', 
+                     self.name, 
+                     self.temp_dir.name)
+
+        output = subprocess.run(["cargo", "run", "--verbose"],
+                       cwd=self.crate,
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE)
+
+        if output.returncode != 0:
+            logging.error("Test failed ✘")
+            pretty_print_output(output)
+            return
+        else:
+            logging.info("Pass ✔")
+
+
+    def generate_build_rs(self):
         asset_dir = self.assets_to_embed()
-        logging.debug("Asset dir is %s", asset_dir)
-
-        self.generate_build_rs(asset_dir)
-        self.update_cargo_toml(asset_dir)
-
-    def generate_build_rs(self, asset_dir):
-        logging.info("Generating build.rs")
+        logging.info("Generating build.rs (assets: %s)", asset_dir)
 
         build_rs = self.crate / "build.rs"
 
         with open(build_rs, "w") as f:
             f.write(BUILD_RS_TEMPLATE.format(asset_dir))
 
-    def update_cargo_toml(self, asset_dir):
+    def update_cargo_toml(self):
         logging.info("Updating Cargo.toml")
         cargo_toml = self.crate / "Cargo.toml"
 
         with open(cargo_toml, "w") as f:
-            f.write(CARGO_TOML_TEMPLATE.format(project_root, asset_dir))
+            f.write(CARGO_TOML_TEMPLATE.format(self.name, project_root))
 
     def assets_to_embed(self):
         # Search for the "special" pattern -> include_dir!("path/to/assets")
@@ -113,9 +143,13 @@ class IntegrationTest:
         with open(self.script) as f:
             got = pattern.search(f.read())
             if got is None:
-                return project_root
+                return project_root / "src"
             else:
                 return Path(abspath(got.groups(1)))
+
+    def copy_across_cache(self):
+        logging.info('Copying across "target/" dir')
+        shutil.copytree(project_root / "target", self.crate / "target")
 
     def __repr__(self):
         return '<{}: filename="{}">'.format(
@@ -134,6 +168,8 @@ def discover_integration_tests():
 def main():
     for test in discover_integration_tests():
         test.initialize()
+        # time.sleep(12000)
+        test.run()
 
 if __name__ == "__main__":
     main()
