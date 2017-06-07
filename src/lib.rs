@@ -18,6 +18,7 @@ extern crate tempdir;
 
 mod files;
 mod dirs;
+mod serializer;
 
 pub use errors::*;
 pub use files::File;
