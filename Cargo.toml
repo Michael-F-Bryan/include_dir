@@ -2,6 +2,20 @@
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
 name = "include_dir"
 version = "0.1.0"
+description = "The logical evolution of the include_str macro for embedding a directory tree into your binary. "
+license = "MIT"
+documentation = "https://docs.rs/include_dir"
+repository = "https://github.com/Michael-F-Bryan/include_dir"
+categories = ["development-tools", "web-programming", "game-engines"]
+keywords = ["include", "embed", "assets"]
+
+[badges]
+travis-ci = { repository = "https://github.com/Michael-F-Bryan/include_dir", 
+              branch = "master" }
+appveyor = { repository = "https://github.com/Michael-F-Bryan/include_dir", 
+             branch = "master", 
+             service = "github" }
+
 
 [dependencies]
 error-chain = "0.10.0"
