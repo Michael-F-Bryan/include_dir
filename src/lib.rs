@@ -23,6 +23,7 @@ mod serializer;
 pub use errors::*;
 pub use files::File;
 pub use dirs::{include_dir, Dir};
+pub use serializer::Serializer;
 
 
 mod errors {

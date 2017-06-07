@@ -5,7 +5,9 @@ use dirs::Dir;
 use errors::*;
 
 
-struct Serializer<W>
+/// The object in charge of serializing `Files` and `Dirs` to some `io::Writer`.
+#[derive(Debug)]
+pub struct Serializer<W>
     where W: Write
 {
     writer: W,
@@ -14,7 +16,8 @@ struct Serializer<W>
 impl<W> Serializer<W>
     where W: Write
 {
-    fn new(writer: W) -> Serializer<W> {
+    /// Create a new Serializer and write to the provided writer.
+    pub fn new(writer: W) -> Serializer<W> {
         Serializer { writer }
     }
 
