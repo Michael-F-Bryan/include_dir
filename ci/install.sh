@@ -8,7 +8,7 @@ dependencies() {
 
   # travis-pyenv
   wget https://github.com/praekeltfoundation/travis-pyenv/releases/download/0.3.0/setup-pyenv.sh 
-  sh ./setup-pyenv.sh
+  bash ./setup-pyenv.sh
 }
 
 main() {
