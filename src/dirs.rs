@@ -93,7 +93,8 @@ mod tests {
     use tempfile::NamedTempFile;
     use tempdir::TempDir;
     use std::fs;
-    use std::io::Write;
+    use std::io::{Read, Seek, SeekFrom, Write};
+    use std::process::{Command, Output};
 
     #[test]
     fn dir_only_works_on_directories() {
@@ -149,6 +150,31 @@ mod tests {
                                 dir.name);
 
         assert_eq!(String::from_utf8(buffer).unwrap(), should_be);
+    }
+
+    #[test]
+    fn make_sure_dir_compiles() {
+        let mut temp = NamedTempFile::new().unwrap();
+
+        let dir = include_dir(concat!(env!("CARGO_MANIFEST_DIR"), "/src")).unwrap();
+
+        dir.write_to(&mut temp).unwrap();
+
+        let output = compile(temp.path()).unwrap();
+        println!("{:?}", output);
+
+        let mut buffer = Vec::new();
+        temp.seek(SeekFrom::Start(0)).unwrap();
+        temp.read_to_end(&mut buffer).unwrap();
+        println!("{}", String::from_utf8(buffer).unwrap());
+        panic!();
+    }
+
+    fn compile<P: AsRef<Path>>(s: P) -> Result<Output> {
+        Command::new("rustc")
+            .arg(s.as_ref().to_str().unwrap())
+            .output()
+            .map_err(|e| e.into())
     }
 
 }
