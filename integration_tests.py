@@ -97,7 +97,7 @@ class IntegrationTest:
         self.crate = Path(self.temp_dir.name) / crate_name
 
         main_rs = self.crate / "src" / "main.rs"
-        shutil.copy(self.script, main_rs.as_posix())
+        shutil.copy(self.script.as_posix(), main_rs.as_posix())
 
         self.generate_build_rs()
         self.update_cargo_toml()
