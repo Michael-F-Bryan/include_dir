@@ -96,8 +96,7 @@ class IntegrationTest:
 
         self.crate = Path(self.temp_dir.name) / crate_name
 
-        main_rs = self.crate / "src" / "main.rs"
-        shutil.copy(self.script.as_posix(), main_rs.as_posix())
+        shutil.copy(self.script, self.crate / "src" / "main.rs")
 
         self.generate_build_rs()
         self.update_cargo_toml()
@@ -139,7 +138,7 @@ class IntegrationTest:
         # Search for the "special" pattern -> include_dir!("path/to/assets")
         pattern = re.compile(r'include_dir!\("([\w\d./]+)"\)')
 
-        with open(self.script.as_posix()) as f:
+        with open(self.script) as f:
             got = pattern.search(f.read())
             if got is None:
                 return project_root / "src"
