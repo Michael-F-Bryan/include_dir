@@ -5,6 +5,26 @@ use std::io::Read;
 use errors::*;
 
 
+/// Read a single file into memory.
+pub fn include_file<P: AsRef<Path>>(filename: P) -> Result<File> {
+    let full_name = PathBuf::from(filename.as_ref());
+    let name = match full_name.file_name().and_then(|s| s.to_str()) {
+        Some(s) => s.to_string(),
+        None => bail!("Filename is invalid"),
+    };
+
+    if !full_name.is_file() {
+        bail!("{} is not a file", full_name.display());
+    }
+
+    let mut contents = Vec::new();
+    fs::File::open(&full_name)?.read_to_end(&mut contents)?;
+
+    Ok(File { name, contents })
+}
+
+
+/// A basic representation of a file.
 #[derive(PartialEq, Clone, Default, Debug)]
 pub struct File {
     name: String,
@@ -13,27 +33,12 @@ pub struct File {
 
 
 impl File {
-    pub fn new<P: AsRef<Path>>(filename: P) -> Result<File> {
-        let full_name = PathBuf::from(filename.as_ref());
-        let name = match full_name.file_name().and_then(|s| s.to_str()) {
-            Some(s) => s.to_string(),
-            None => bail!("Filename is invalid"),
-        };
-
-        if !full_name.is_file() {
-            bail!("{} is not a file", full_name.display());
-        }
-
-        let mut contents = Vec::new();
-        fs::File::open(&full_name)?.read_to_end(&mut contents)?;
-
-        Ok(File { name, contents })
-    }
-
+    /// Get the file's name.
     pub fn name(&self) -> &str {
         &self.name
     }
 
+    /// The file's contents.
     pub fn contents(&self) -> &[u8] {
         &self.contents
     }
@@ -59,7 +64,7 @@ mod tests {
     fn new_file() {
         let (path, mut f) = dummy_file();
 
-        let file = File::new(&path).unwrap();
+        let file = include_file(&path).unwrap();
 
         let mut file_contents = Vec::new();
         f.read_to_end(&mut file_contents).unwrap();
@@ -73,6 +78,6 @@ mod tests {
     fn file_only_works_on_files() {
         let t = TempDir::new("blah").unwrap();
 
-        assert!(File::new(t.path()).is_err());
+        assert!(include_file(t.path()).is_err());
     }
 }

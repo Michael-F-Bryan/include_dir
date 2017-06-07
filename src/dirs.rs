@@ -1,9 +1,10 @@
 use std::path::{Path, PathBuf};
 
-use files::File;
+use files::{include_file, File};
 use errors::*;
 
 
+/// Traverse a file tree, building up an in-memory representation of it.
 pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
     let full_name = PathBuf::from(root.as_ref());
     let name = match full_name.file_name().and_then(|s| s.to_str()) {
@@ -42,11 +43,13 @@ fn files_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<File>> {
         .filter_map(|dir_entry| dir_entry.ok())
         .map(|dir_entry| dir_entry.path())
         .filter(|p| p.is_file())
-        .map(File::new)
+        .map(include_file)
         .collect()
 }
 
 
+/// Representation of a directory in memory.
+#[derive(Debug, Clone, PartialEq)]
 pub struct Dir {
     name: String,
     files: Vec<File>,
@@ -55,14 +58,17 @@ pub struct Dir {
 
 
 impl Dir {
+    /// Get the directory's name
     pub fn name(&self) -> &str {
         &self.name
     }
 
+    /// The files in this directory.
     pub fn files(&self) -> &[File] {
         &self.files
     }
 
+    /// The subdirectories in this directory.
     pub fn subdirs(&self) -> &[Dir] {
         &self.subdirs
     }
