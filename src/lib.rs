@@ -27,6 +27,14 @@
 //! ```rust,ignore
 //! include!(concat!(env!("OUT_DIR"), "/assets.rs"));
 //! ```
+//!
+//! # Note
+//!
+//! Because a large part of this crate's functionality comes from code
+//! generation, the best reference for features and examples will be the
+//! [integration tests] directory.
+//!
+//! [integration tests]: https://github.com/Michael-F-Bryan/include_dir/tree/master/integration_tests
 
 #![deny(missing_docs,
         missing_debug_implementations, missing_copy_implementations,

@@ -51,13 +51,14 @@ impl<W> Serializer<W>
             self.write_dir(dir)?;
             writeln!(self.writer, ",")?;
         }
-        write!(self.writer, "] }}")?;
+        writeln!(self.writer, "]")?;
+        writeln!(self.writer, "}}")?;
 
         Ok(self)
     }
 
     fn write_file_definition(&mut self) -> Result<&mut Self> {
-        writeln!(self.writer, "/// A static asset")?;
+        writeln!(self.writer, "/// A single static asset.")?;
 
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
         writeln!(self.writer,
@@ -65,11 +66,6 @@ impl<W> Serializer<W>
                     pub name: &'static str,
                     pub contents: &'static [u8]
                 }}")?;
-
-        // writeln!(self.writer, "{}",
-        //          "impl File {
-        //              fn as_string(&self) -> Result<
-        //          }")?;
 
         Ok(self)
     }
@@ -109,6 +105,24 @@ impl<W> Serializer<W>
                 None
             }
 
+            /// Recursively walk the various sub-directories and files inside
+            /// the bundled asset.
+            ///
+            /// # Examples
+            ///
+            /// ```rust,ignore
+            /// for entry in ASSET.walk() {
+            ///   match entry {
+            ///     DirEntry::File(f) => println!("{} ({} bytes)",
+            ///                                   f.name(),
+            ///                                   f.contents.len()),
+            ///     DirEntry::Dir(d) => println!("{} (files: {}, subdirs: {})",
+            ///                                  d.name(),
+            ///                                  d.files.len(),
+            ///                                  d.subdirs.len()),
+            ///   }
+            /// }
+            /// ```
             pub fn walk<'a>(&'a self) -> DirWalker<'a>
             {
                 DirWalker::new(self)
@@ -119,6 +133,8 @@ impl<W> Serializer<W>
     }
 
     fn write_direntry_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer, "{}", "/// A directory entry.")?;
+
         writeln!(self.writer, "#[derive(Debug, PartialEq, Clone)]")?;
         writeln!(self.writer,
                  "{}",
@@ -143,6 +159,18 @@ impl<W> Serializer<W>
     }
 
     fn write_dirwalker_definition(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer,
+                 "{}",
+                 "/// A directory walker.
+                  ///
+                  /// `DirWalker` is an iterator which will recursively traverse
+                  /// the embedded directory, allowing you to inspect each item.
+                  /// It is largely modelled on the API used by the `walkdir`
+                  /// crate.
+                  ///
+                  /// You probably won't create one of these directly, instead
+                  /// prefer to use the `Dir::walk()` method.")?;
+
         writeln!(self.writer, "#[derive(Debug, PartialEq, Clone)]")?;
         writeln!(self.writer,
                  "{}",
