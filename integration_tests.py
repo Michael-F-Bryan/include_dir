@@ -36,6 +36,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 from docopt import docopt
+import jinja2
 
 DEBUG = False
 
@@ -52,27 +53,36 @@ use std::env;
 use std::path::Path;
 use include_dir::include_dir;
 
-fn main() {{
+fn main() {
     let outdir = env::var("OUT_DIR").unwrap();
     let dest_path = Path::new(&outdir).join("assets.rs");
 
-    include_dir("{}")
+    include_dir("{{ root }}")
         .as_variable("ASSETS")
-        .ignore(".git")
-        .ignore("target")
+        {% for ignore in ignores %}
+        .ignore("{{ ignore }}")
+        {% endfor %}
         .to_file(dest_path)
         .unwrap();
-    }}
+    }
 """
 
 CARGO_TOML_TEMPLATE = """
 [package]
 authors = ["Michael-F-Bryan <michaelfbryan@gmail.com>"]
-name = "{}"
+name = "{{ name }}"
 version = "0.1.0"
 
-[build-dependencies]
-include_dir = {{path = "{}"}}
+[build-dependencies.include_dir]
+path = "{{ include_dir_path }}" 
+{% if features %}
+features = {{ features }}
+{% endif %}
+
+[dependencies]
+{% for dep in dependencies %}
+{{ dep }} = "*"
+{% endfor %}
 """
 
 def pretty_print_output(name, output):
@@ -124,8 +134,9 @@ class IntegrationTest:
 
         shutil.copy(self.script, self.crate / "src" / "main.rs")
 
-        self._generate_build_rs()
-        self._update_cargo_toml()
+        analysis = self._analyse_script()
+        self._generate_build_rs(analysis)
+        self._update_cargo_toml(analysis)
         self._copy_across_cache()
 
     def run(self):
@@ -151,32 +162,53 @@ class IntegrationTest:
             logging.info('%-20s\t✔', self.name)
 
 
-    def _generate_build_rs(self):
-        asset_dir = self._assets_to_embed()
-        logging.debug("(%s) Generating build.rs (assets: %s)", self.name, asset_dir)
+    def _generate_build_rs(self, analysis):
+        logging.debug("(%s) Generating build.rs (assets: %s)", self.name, analysis["root"])
 
         build_rs = self.crate / "build.rs"
 
         with open(build_rs, "w") as f:
-            f.write(BUILD_RS_TEMPLATE.format(asset_dir))
+            build_template = jinja2.Template(BUILD_RS_TEMPLATE)
+            f.write(build_template.render(analysis))
 
-    def _update_cargo_toml(self):
+    def _update_cargo_toml(self, analysis):
         logging.debug("(%s) Updating Cargo.toml", self.name)
         cargo_toml = self.crate / "Cargo.toml"
 
         with open(cargo_toml, "w") as f:
-            f.write(CARGO_TOML_TEMPLATE.format(self.name, project_root))
+            template = jinja2.Template(CARGO_TOML_TEMPLATE)
+            context = {
+                "name": self.name,
+                "include_dir_path": project_root,
+                "dependencies": analysis["dependencies"],
+            }
+            f.write(template.render(context))
 
-    def _assets_to_embed(self):
-        # Search for the "special" pattern -> include_dir!("path/to/assets")
-        pattern = re.compile(r'include_dir!\("([\w\d./]+)"\)')
+    def _analyse_script(self):
+        keywords = {
+            "features": "FEATURE",
+            "root": "ROOT",
+            "ignore": "IGNORE"
+        }
+        context = {}
+        context["root"] = project_root / "src"
+        context["dependencies"] = []
 
         with open(self.script) as f:
-            got = pattern.search(f.read())
-            if got is None:
-                return project_root  / "src"
-            else:
-                return Path(os.path.abspath(got.groups(1)))
+            for line in f:
+                for name, keyword in keywords.items():
+                    pattern = re.compile(r"// {}:(\s+[\w\d]+)+".format(keyword))
+                    match = pattern.search(line)
+                    if match:
+                        values = [v.strip() for v in match.groups()]
+                        context[name] = values if len(values) > 1 else values[0]
+
+                match = re.search(r"extern crate ([\w_]+)", line)
+                if match:
+                    context["dependencies"].append(match.group(1))
+
+        logging.debug("(%s) Context: %s", self.name, context)
+        return context
 
     def _copy_across_cache(self):
         logging.debug('(%s) Copying across "target/" dir', self.name)
@@ -219,8 +251,10 @@ def main(args):
     if len(tests) == 0:
         logging.warning("No tests match the provided pattern")
 
-    with ThreadPoolExecutor() as pool:
-        pool.map(run_test, tests)
+    for test in tests:
+        run_test(test)
+    # with ThreadPoolExecutor() as pool:
+    #     pool.map(run_test, tests)
 
 if __name__ == "__main__":
     options = docopt(__doc__)
