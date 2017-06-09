@@ -3,9 +3,23 @@ use std::path::{Path, PathBuf};
 use files::{include_file, File};
 use errors::*;
 
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Options {
+    ignore: Vec<String>,
+}
 
-/// Traverse a file tree, building up an in-memory representation of it.
-pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
+impl Options {
+    pub fn new() -> Options {
+        Options::default()
+    }
+
+    pub fn ignore(&mut self, name: &str) -> &mut Self {
+        self.ignore.push(name.to_string());
+        self
+    }
+}
+
+pub fn include_dir_with_options<P: AsRef<Path>>(root: P, options: Options) -> Result<Dir> {
     let full_name = PathBuf::from(root.as_ref());
     let name = match full_name.file_name().and_then(|s| s.to_str()) {
         Some(s) => s.to_string(),
@@ -17,8 +31,8 @@ pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
     }
 
 
-    let files = files_in_dir(&full_name)?;
-    let subdirs = dirs_in_dir(&full_name)?;
+    let files = files_in_dir(&full_name, &options)?;
+    let subdirs = dirs_in_dir(&full_name, &options)?;
 
     Ok(Dir {
            name,
@@ -27,7 +41,12 @@ pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
        })
 }
 
-fn dirs_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<Dir>> {
+/// Traverse a file tree, building up an in-memory representation of it.
+pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
+    include_dir_with_options(root, Options::new())
+}
+
+fn dirs_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<Dir>> {
     root.as_ref()
         .read_dir()?
         .filter_map(|entry| entry.ok())
@@ -37,7 +56,7 @@ fn dirs_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<Dir>> {
         .collect()
 }
 
-fn files_in_dir<P: AsRef<Path>>(root: P) -> Result<Vec<File>> {
+fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>> {
     root.as_ref()
         .read_dir()?
         .filter_map(|dir_entry| dir_entry.ok())
@@ -100,7 +119,7 @@ mod tests {
             .write("File 1".as_bytes())
             .unwrap();
 
-        let got_files = files_in_dir(&temp_path).unwrap();
+        let got_files = files_in_dir(&temp_path, &Options::new()).unwrap();
 
         assert_eq!(got_files.len(), 1);
         assert_eq!(got_files[0].name(), "file_1.txt");
