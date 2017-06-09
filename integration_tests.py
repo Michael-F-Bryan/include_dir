@@ -42,7 +42,7 @@ DEBUG = False
 
 project_root = Path(os.path.abspath(__file__)).parent
 
-logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s', 
+logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s',
                     datefmt='%m/%d/%Y %I:%M:%S %p',
                     level=logging.DEBUG if DEBUG else logging.INFO)
 
@@ -182,6 +182,8 @@ class IntegrationTest:
                 "include_dir_path": project_root,
                 "dependencies": analysis["dependencies"],
             }
+            feat = analysis.get("features", [])
+            context["features"] = feat if isinstance(feat, list) else [feat]
             f.write(template.render(context))
 
     def _analyse_script(self):
@@ -251,10 +253,10 @@ def main(args):
     if len(tests) == 0:
         logging.warning("No tests match the provided pattern")
 
-    for test in tests:
-        run_test(test)
-    # with ThreadPoolExecutor() as pool:
-    #     pool.map(run_test, tests)
+    # for test in tests:
+    #     run_test(test)
+    with ThreadPoolExecutor() as pool:
+        pool.map(run_test, tests)
 
 if __name__ == "__main__":
     options = docopt(__doc__)

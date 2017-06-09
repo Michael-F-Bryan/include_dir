@@ -276,10 +276,56 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
+    #[cfg(feature = "globs")]
+    fn write_globs(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer,
+                 "{}",
+                 "pub struct Globs<'a> {
+                     walker: DirWalker<'a>,
+                     pattern: ::glob::Pattern,
+                 }")?;
+        writeln!(self.writer,
+                 "{}",
+                 r#"
+                 impl<'a> Iterator for Globs<'a> {
+                    type Item = DirEntry<'a>;
+                    fn next(&mut self) -> Option<Self::Item> {
+                        while let Some(entry) = self.walker.next() {
+                            if self.pattern.matches_path(entry.path()) {
+                                return Some(entry);
+                            }
+                        }
+
+                        None
+                    }
+                 }
+        "#)?;
+
+        writeln!(self.writer,
+                 "{}",
+                 "impl Dir {
+                    pub fn glob<'a>(&'a self, pattern: &str) -> Result<Globs<'a>, Box<::std::error::Error>> {
+                        let pattern = ::glob::Pattern::new(pattern)?;
+                        Ok(Globs {
+                            walker: self.walk(),
+                            pattern: pattern,
+                        })
+                    }
+            }")?;
+
+        Ok(self)
+    }
+
+    #[cfg(not(feature = "globs"))]
+    fn write_globs(&mut self) -> Result<&mut Self> {
+        Ok(self)
+    }
+
     pub fn write_definitions(&mut self) -> Result<&mut Self> {
         self.write_file_definition()?
             .write_dir_definition()?
             .write_dirwalker_definition()?
+            .write_globs()?
             .write_direntry_definition()?;
 
         Ok(self)
@@ -298,7 +344,10 @@ mod tests {
     use dirs::include_dir;
 
     macro_rules! compile_and_test {
-        ($name:ident, |$ser:ident| $setup_serializer:expr) => (
+        ($( #[$attr:meta] )* $name:ident, |$ser:ident| $setup_serializer:expr) => (
+            $(
+                #[$attr]
+            )*
             #[test]
             fn $name() {
                 fn inner() -> Result<()> {
@@ -401,8 +450,7 @@ mod tests {
     }
 
     compile_and_test!(compile_file_definition, |ser| ser.write_file_definition()?);
-
-    compile_and_test!(compile_dir_definition, |ser| ser.write_definitions()?);
+    compile_and_test!(compile_all_definitions, |ser| ser.write_definitions()?);
 
 
     compile_and_test!(compile_a_dir_and_save_it_as_a_constant, |ser| {
