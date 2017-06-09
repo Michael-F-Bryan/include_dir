@@ -60,11 +60,17 @@ pub fn include_dir<P: AsRef<Path>>(root: P) -> Result<Dir> {
 }
 
 fn dirs_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<Dir>> {
-    root.as_ref()
+    let dirs = root.as_ref()
         .read_dir()?
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|p| p.is_dir())
+        .inspect(|p| println!("{}", p.display()));
+
+    dirs.filter(|p| {
+                    let relative_path = p.strip_prefix(root.as_ref()).unwrap();
+                    !options.is_ignored(relative_path)
+                })
         .map(include_dir)
         .collect()
 }
@@ -167,5 +173,16 @@ mod tests {
         let files = files_in_dir(&src_directory, &options).unwrap();
 
         assert!(files.iter().all(|f| f.name() != "libs.rs"));
+    }
+
+    #[test]
+    fn ignore_dirs() {
+        let mut options = Options::new();
+        options.ignore(".git").ignore("target");
+
+        let src_directory = env!("CARGO_MANIFEST_DIR");
+        let dirs = dirs_in_dir(&src_directory, &options).unwrap();
+
+        assert!(dirs.iter().all(|d| d.name != ".git" && d.name != "target"));
     }
 }
