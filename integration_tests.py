@@ -12,12 +12,13 @@ will:
 - Copy the `*.rs` file into this new crate and rename it to `main.rs`.
 - Scan the `*.rs` file for a **special** pattern indicating which asset
   directory will be included (relative to this crate's root directory). If the
-  pattern isn't found, use this crate's `src/` directory.
+  pattern isn't found, use this crate's directory (ignoring ".git" and "target").
 - Generate a `build.rs` file which will compile in the specified file tree.
 - Compile and run the new binary test crate.
 """
 
 import os
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -26,11 +27,13 @@ import shutil
 import re
 import time
 
+DEBUG = False
+
 project_root = Path(os.path.abspath(__file__)).parent
 
 logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s', 
                     datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.INFO)
+                    level=logging.DEBUG if DEBUG else logging.INFO)
 
 BUILD_RS_TEMPLATE = """
 extern crate include_dir;
@@ -45,6 +48,8 @@ fn main() {{
 
     include_dir("{}")
         .as_variable("ASSETS")
+        .ignore(".git")
+        .ignore("target")
         .to_file(dest_path)
         .unwrap();
     }}
@@ -84,7 +89,11 @@ class IntegrationTest:
         logging.debug("Initializing test crate in %s", self.temp_dir.name)
         crate_name = self.name
 
-        output = subprocess.run(["cargo", "new", "--bin", crate_name],
+        cmd = ["cargo", "new", "--bin", crate_name]
+        if DEBUG:
+            cmd.append("--verbose")
+
+        output = subprocess.run(cmd,
                        cwd=self.temp_dir.name,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
@@ -105,7 +114,12 @@ class IntegrationTest:
     def run(self):
         logging.info('Running test "%s"', self.name)
 
-        output = subprocess.run(["cargo", "run"],
+        cmd = ["cargo", "run"]
+
+        if DEBUG:
+            cmd.append("--verbose")
+
+        output = subprocess.run(cmd,
                        cwd=self.crate,
                        stdout=subprocess.PIPE,
                        stderr=subprocess.PIPE)
@@ -141,13 +155,13 @@ class IntegrationTest:
         with open(self.script) as f:
             got = pattern.search(f.read())
             if got is None:
-                return project_root / "src"
+                return project_root  / "src"
             else:
                 return Path(abspath(got.groups(1)))
 
     def copy_across_cache(self):
         logging.debug('Copying across "target/" dir')
-        shutil.copytree(project_root / "target", self.crate / "target")
+        os.symlink(project_root / "target", self.crate / "target")
 
     def __repr__(self):
         return '<{}: filename="{}">'.format(

@@ -147,7 +147,8 @@ mod tests {
         let got_files = files_in_dir(&temp_path, &Options::new()).unwrap();
 
         assert_eq!(got_files.len(), 1);
-        assert_eq!(got_files[0].name(), "file_1.txt");
+        assert_eq!(got_files[0].relative_to(&temp_path).unwrap(),
+                   PathBuf::from("file_1.txt"));
     }
 
     #[test]
@@ -172,7 +173,10 @@ mod tests {
         let src_directory = concat!(env!("CARGO_MANIFEST_DIR"), "/src/");
         let files = files_in_dir(&src_directory, &options).unwrap();
 
-        assert!(files.iter().all(|f| f.name() != "libs.rs"));
+        let files_contains_lib = files
+            .iter()
+            .any(|f| f.name().to_str().unwrap().contains("lib.rs"));
+        assert!(!files_contains_lib);
     }
 
     #[test]
@@ -183,6 +187,8 @@ mod tests {
         let src_directory = env!("CARGO_MANIFEST_DIR");
         let dirs = dirs_in_dir(&src_directory, &options).unwrap();
 
-        assert!(dirs.iter().all(|d| d.name != ".git" && d.name != "target"));
+        let dirs_contains_git_or_target =
+            dirs.iter().any(|d| d.name != ".git" && d.name != "target");
+        assert!(!dirs_contains_git_or_target);
     }
 }

@@ -63,6 +63,7 @@ pub mod errors {
     error_chain!{
         foreign_links {
             IO(::std::io::Error) #[doc = "A wrapper around a std::io::Error"];
+            StripPath(::std::path::StripPrefixError) #[doc = "A wrapper around a strip prefix error"];
         }
     }
 }

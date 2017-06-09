@@ -1,9 +1,9 @@
 #![cfg_attr(feature = "cargo-clippy", allow(wrong_self_convention))]
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::fs::File;
 
-use dirs::{self, Dir};
+use dirs::{self, Dir, Options};
 use serializer::Serializer;
 use errors::*;
 
@@ -14,10 +14,12 @@ use errors::*;
 ///
 /// It is pretty much assumed that you'll use it in the order described in
 /// `include_dir`'s docs. Straying from that path will only lead to frustration.
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct IncludeDirBuilder {
     dir: Option<Dir>,
+    root: Option<PathBuf>,
     variable: Option<String>,
+    options: Options,
     err: Option<Error>,
 }
 
@@ -44,28 +46,32 @@ pub struct IncludeDirBuilder {
 pub fn include_dir(root: &str) -> IncludeDirBuilder {
     let dir = dirs::include_dir(root);
 
+    let mut this = IncludeDirBuilder::default();
+    this.root = Some(PathBuf::from(root));
+
     match dir {
-        Ok(d) => {
-            IncludeDirBuilder {
-                dir: Some(d),
-                variable: None,
-                err: None,
-            }
-        }
-        Err(e) => {
-            IncludeDirBuilder {
-                dir: None,
-                variable: None,
-                err: Some(e),
-            }
-        }
+        Ok(d) => this.dir = Some(d),
+        Err(e) => this.err = Some(e),
     }
+
+    this
 }
 
 impl IncludeDirBuilder {
     /// Set the variable name to save your assets under.
     pub fn as_variable(mut self, name: &str) -> Self {
         self.variable = Some(name.to_string());
+        self
+    }
+
+    /// Ignore a directory or file.
+    ///
+    /// # Note
+    ///
+    /// For now, this will only match the path relative to the included
+    /// directory.
+    pub fn ignore<S: AsRef<str>>(mut self, name: S) -> Self {
+        self.options.ignore(name.as_ref());
         self
     }
 
@@ -86,8 +92,13 @@ impl IncludeDirBuilder {
             None => bail!("No directory selected"),
         };
 
+        let root = match self.root {
+            Some(r) => r,
+            None => bail!("No directory selected"),
+        };
+
         let f = File::create(path).chain_err(|| "Unable to open file")?;
-        let mut serializer = Serializer::new(f);
+        let mut serializer = Serializer::new(root, f);
 
         serializer
             .dir_as_static(&variable_name, &dir)?

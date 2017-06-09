@@ -1,4 +1,5 @@
 use std::io::Write;
+use std::path::{Path, PathBuf};
 
 use files::File;
 use dirs::Dir;
@@ -10,6 +11,7 @@ use errors::*;
 pub struct Serializer<W>
     where W: Write
 {
+    root: PathBuf,
     writer: W,
 }
 
@@ -17,14 +19,17 @@ impl<W> Serializer<W>
     where W: Write
 {
     /// Create a new Serializer and write to the provided writer.
-    pub fn new(writer: W) -> Serializer<W> {
-        Serializer { writer }
+    pub fn new<P: AsRef<Path>>(root: P, writer: W) -> Serializer<W> {
+        Serializer {
+            root: PathBuf::from(root.as_ref()),
+            writer: writer,
+        }
     }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
         write!(self.writer,
                r#"File {{ name: "{}", contents: &{:?} }}"#,
-               f.name(),
+               f.name().display(),
                f.contents())?;
 
         Ok(self)
@@ -250,7 +255,7 @@ mod tests {
                 fn inner() -> Result<()> {
                     let mut buffer = Vec::new();
                     {
-                        let mut $ser = Serializer::new(&mut buffer);
+                        let mut $ser = Serializer::new("", &mut buffer);
                         $setup_serializer;
                     }
 
@@ -325,7 +330,7 @@ mod tests {
         let mut writer = Vec::new();
 
         {
-            let mut serializer = Serializer::new(&mut writer);
+            let mut serializer = Serializer::new("", &mut writer);
             serializer.write_file_definition().unwrap();
         }
 
@@ -338,7 +343,7 @@ mod tests {
         let mut writer = Vec::new();
 
         {
-            let mut serializer = Serializer::new(&mut writer);
+            let mut serializer = Serializer::new("", &mut writer);
             serializer.write_dir_definition().unwrap();
         }
 

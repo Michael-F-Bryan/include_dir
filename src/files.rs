@@ -7,40 +7,39 @@ use errors::*;
 
 /// Read a single file into memory.
 pub fn include_file<P: AsRef<Path>>(filename: P) -> Result<File> {
-    let full_name = PathBuf::from(filename.as_ref());
-    let name = match full_name.file_name().and_then(|s| s.to_str()) {
-        Some(s) => s.to_string(),
-        None => bail!("Filename is invalid"),
-    };
+    let name = PathBuf::from(filename.as_ref());
 
-    if !full_name.is_file() {
-        bail!("{} is not a file", full_name.display());
+    if !name.is_file() {
+        bail!("{} is not a file", name.display());
     }
 
-    let mut contents = Vec::new();
-    fs::File::open(&full_name)?.read_to_end(&mut contents)?;
-
-    Ok(File { name, contents })
+    Ok(File { path: PathBuf::from(name) })
 }
 
 
 /// A basic representation of a file.
 #[derive(PartialEq, Clone, Default, Debug)]
 pub struct File {
-    name: String,
-    contents: Vec<u8>,
+    path: PathBuf,
 }
 
 
 impl File {
     /// Get the file's name.
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn name(&self) -> &Path {
+        &self.path
     }
 
     /// The file's contents.
-    pub fn contents(&self) -> &[u8] {
-        &self.contents
+    pub fn contents(&self) -> Result<fs::File> {
+        fs::File::open(&self.path).map_err(|e| e.into())
+    }
+
+    pub fn relative_to<P: AsRef<Path>>(&self, to: P) -> Result<PathBuf> {
+        self.path
+            .strip_prefix(to.as_ref())
+            .map(|p| PathBuf::from(p))
+            .map_err(Into::into)
     }
 }
 
@@ -69,9 +68,10 @@ mod tests {
         let mut file_contents = Vec::new();
         f.read_to_end(&mut file_contents).unwrap();
 
-        assert_eq!(file.contents, file_contents);
-        assert_eq!(file.name,
-                   path.file_name().and_then(|s| s.to_str()).unwrap());
+        let mut got = Vec::new();
+        file.contents().unwrap().read_to_end(&mut got).unwrap();
+        assert_eq!(got, file_contents);
+        assert_eq!(file.name(), path);
     }
 
     #[test]
