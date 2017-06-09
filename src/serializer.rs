@@ -92,8 +92,14 @@ impl<W> Serializer<W>
                          self.path.as_ref()
                      }
 
+                    /// The file's name (everything after the last slash).
                     pub fn name(&self) -> &str {
                         self.path().file_name().unwrap().to_str().unwrap()
+                    }
+
+                    /// Get a Reader over the file's contents.
+                    pub fn as_reader(&self) -> ::std::io::Cursor<&[u8]> {
+                        ::std::io::Cursor::new(&self.contents)
                     }
                 }")?;
 
@@ -144,10 +150,10 @@ impl<W> Serializer<W>
             /// for entry in ASSET.walk() {
             ///   match entry {
             ///     DirEntry::File(f) => println!("{} ({} bytes)",
-            ///                                   f.name(),
+            ///                                   f.path().display(),
             ///                                   f.contents.len()),
             ///     DirEntry::Dir(d) => println!("{} (files: {}, subdirs: {})",
-            ///                                  d.name(),
+            ///                                  d.path().display(),
             ///                                  d.files.len(),
             ///                                  d.subdirs.len()),
             ///   }
@@ -163,6 +169,7 @@ impl<W> Serializer<W>
                 self.path().file_name().map(|s| s.to_str().unwrap()).unwrap_or("")
             }
 
+            /// The directory's full path relative to the root.
             pub fn path(&self) -> &::std::path::Path {
                 self.path.as_ref()
             }
