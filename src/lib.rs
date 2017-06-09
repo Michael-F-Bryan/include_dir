@@ -22,10 +22,16 @@
 //! ```
 //!
 //! Then in one of your source files, you'll need to include the generated
-//! `assets.rs` file.
+//! `assets.rs` file. Notice that it's been included as a submodule, that
+//! way the code `include_dir` generates won't pollute the rest of your project.
+//! By making it public, you also gain the ability to check out the generated
+//! assets and see what you can do with them.
 //!
 //! ```rust,ignore
-//! include!(concat!(env!("OUT_DIR"), "/assets.rs"));
+//! #[allow(dead_code)]
+//! pub mod assets {
+//!     include!(concat!(env!("OUT_DIR"), "/assets.rs"));
+//! }
 //! ```
 //!
 //! # Note
