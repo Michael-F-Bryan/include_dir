@@ -1,4 +1,4 @@
-use std::io::Write;
+use std::io::{Write, Read};
 use std::path::{Path, PathBuf};
 
 use files::File;
@@ -27,10 +27,18 @@ impl<W> Serializer<W>
     }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
+        // TODO: Use a buffered reader here for easy perf gains
+        let contents = f.contents()?;
         write!(self.writer,
-               r#"File {{ name: "{}", contents: &{:?} }}"#,
-               f.name().display(),
-               f.contents())?;
+               r#"File {{ name: "{}", contents: &["#,
+               f.name().display())?;
+
+        for byte in contents.bytes() {
+            write!(self.writer, "{}, ", byte?)?;
+        }
+
+        writeln!(self.writer, "]")?;
+        writeln!(self.writer, "}}")?;
 
         Ok(self)
     }
