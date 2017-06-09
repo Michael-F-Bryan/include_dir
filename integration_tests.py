@@ -194,7 +194,7 @@ class IntegrationTest:
 
 def discover_integration_tests(patterns):
     # Use a reasonable default if no patterns provided
-    if len(patterns) == 0:
+    if not patterns:
         patterns = ['*.rs']
 
     test_dir = project_root / "integration_tests"
@@ -219,8 +219,6 @@ def main(args):
     if len(tests) == 0:
         logging.warning("No tests match the provided pattern")
 
-    # for test in tests:
-    #     run_test(test)
     with ThreadPoolExecutor() as pool:
         pool.map(run_test, tests)
 
