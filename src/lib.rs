@@ -44,6 +44,7 @@
 
 #[macro_use]
 extern crate error_chain;
+extern crate glob;
 
 #[cfg(test)]
 extern crate tempfile;
@@ -51,6 +52,7 @@ extern crate tempfile;
 extern crate tempdir;
 
 mod files;
+mod helpers;
 mod dirs;
 mod serializer;
 mod frontend;

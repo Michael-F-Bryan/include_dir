@@ -71,7 +71,9 @@ impl IncludeDirBuilder {
     /// For now, this will only match the path relative to the included
     /// directory.
     pub fn ignore<S: AsRef<str>>(mut self, name: S) -> Self {
-        self.options.ignore(name.as_ref());
+        if let Err(e) = self.options.ignore(name.as_ref()) {
+            self.err = Some(e);
+        }
         self
     }
 

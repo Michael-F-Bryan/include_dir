@@ -1,11 +1,13 @@
 use std::path::{Path, PathBuf};
+use glob::Pattern;
 
 use files::{include_file, File};
+use helpers::Locatable;
 use errors::*;
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Options {
-    ignore: Vec<String>,
+    ignore: Vec<Pattern>,
 }
 
 impl Options {
@@ -13,31 +15,22 @@ impl Options {
         Options::default()
     }
 
-    pub fn ignore(&mut self, name: &str) -> &mut Self {
-        self.ignore.push(name.to_string());
-        self
+    pub fn ignore(&mut self, name: &str) -> Result<&mut Self> {
+        let pattern = Pattern::new(name)
+            .chain_err(|| "Invalid glob pattern for ignore")?;
+
+        self.ignore.push(pattern);
+        Ok(self)
     }
 
     fn is_ignored<P: AsRef<Path>>(&self, path: P) -> bool {
-        for ignore in &self.ignore {
-            println!("Checking if {} is ignored by {}",
-                     path.as_ref().display(),
-                     ignore);
-            if path.as_ref() == PathBuf::from(ignore) {
-                return true;
-            }
-        }
-
-        false
+        let path = path.as_ref();
+        self.ignore.iter().any(|ignore| ignore.matches_path(path))
     }
 }
 
 pub fn include_dir_with_options<P: AsRef<Path>>(root: P, options: Options) -> Result<Dir> {
     let full_name = PathBuf::from(root.as_ref());
-    let name = match full_name.file_name().and_then(|s| s.to_str()) {
-        Some(s) => s.to_string(),
-        None => bail!("Directory name is invalid"),
-    };
 
     if !full_name.is_dir() {
         bail!("{} is not a directory", full_name.display());
@@ -48,9 +41,9 @@ pub fn include_dir_with_options<P: AsRef<Path>>(root: P, options: Options) -> Re
     let subdirs = dirs_in_dir(&full_name, &options)?;
 
     Ok(Dir {
-           name,
-           subdirs,
-           files,
+           path: full_name,
+           subdirs: subdirs,
+           files: files,
        })
 }
 
@@ -65,14 +58,13 @@ fn dirs_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<Dir>> {
         .filter_map(|entry| entry.ok())
         .map(|entry| entry.path())
         .filter(|p| p.is_dir())
-        .inspect(|p| println!("{}", p.display()));
-
-    dirs.filter(|p| {
-                    let relative_path = p.strip_prefix(root.as_ref()).unwrap();
+        .filter(|p| {
+                    let relative_path = p.relative_to(root.as_ref()).unwrap();
                     !options.is_ignored(relative_path)
                 })
-        .map(include_dir)
-        .collect()
+        .inspect(|p| println!("{}", p.display()));
+
+    dirs.map(include_dir).collect()
 }
 
 fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>> {
@@ -83,11 +75,14 @@ fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>>
         .filter(|p| p.is_file());
 
     file_paths
-        .filter(|p| {
-                    let relative_path = p.strip_prefix(root.as_ref()).unwrap();
-                    !options.is_ignored(relative_path)
-                })
         .map(include_file)
+        .filter(|f| match *f {
+                    Ok(ref f) => {
+                        let relative_path = f.relative_to(root.as_ref()).unwrap();
+                        !options.is_ignored(relative_path)
+                    } 
+                    _ => true,
+                })
         .collect()
 }
 
@@ -95,7 +90,7 @@ fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>>
 /// Representation of a directory in memory.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dir {
-    name: String,
+    path: PathBuf,
     files: Vec<File>,
     subdirs: Vec<Dir>,
 }
@@ -104,7 +99,7 @@ pub struct Dir {
 impl Dir {
     /// Get the directory's name
     pub fn name(&self) -> &str {
-        &self.name
+        self.path.file_name().unwrap().to_str().unwrap()
     }
 
     /// The files in this directory.
@@ -115,6 +110,12 @@ impl Dir {
     /// The subdirectories in this directory.
     pub fn subdirs(&self) -> &[Dir] {
         &self.subdirs
+    }
+}
+
+impl Locatable for Dir {
+    fn path(&self) -> &Path {
+        &self.path
     }
 }
 
@@ -168,7 +169,7 @@ mod tests {
     #[test]
     fn ignore_files() {
         let mut options = Options::new();
-        options.ignore("lib.rs");
+        options.ignore("lib.rs").unwrap();
 
         let src_directory = concat!(env!("CARGO_MANIFEST_DIR"), "/src/");
         let files = files_in_dir(&src_directory, &options).unwrap();
@@ -182,13 +183,13 @@ mod tests {
     #[test]
     fn ignore_dirs() {
         let mut options = Options::new();
-        options.ignore(".git").ignore("target");
+        options.ignore(".git").unwrap().ignore("target").unwrap();
 
         let src_directory = env!("CARGO_MANIFEST_DIR");
         let dirs = dirs_in_dir(&src_directory, &options).unwrap();
 
-        let dirs_contains_git_or_target =
-            dirs.iter().any(|d| d.name != ".git" && d.name != "target");
+        let dirs_contains_git_or_target = dirs.iter()
+            .any(|d| d.name() == ".git" || d.name() == "target");
         assert!(!dirs_contains_git_or_target);
     }
 }

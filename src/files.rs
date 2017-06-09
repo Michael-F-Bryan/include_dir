@@ -1,8 +1,7 @@
 use std::path::{Path, PathBuf};
 use std::fs;
-use std::io::Read;
-
 use errors::*;
+use helpers::Locatable;
 
 
 /// Read a single file into memory.
@@ -34,12 +33,11 @@ impl File {
     pub fn contents(&self) -> Result<fs::File> {
         fs::File::open(&self.path).map_err(|e| e.into())
     }
+}
 
-    pub fn relative_to<P: AsRef<Path>>(&self, to: P) -> Result<PathBuf> {
-        self.path
-            .strip_prefix(to.as_ref())
-            .map(|p| PathBuf::from(p))
-            .map_err(Into::into)
+impl Locatable for File {
+    fn path(&self) -> &Path {
+        &self.path
     }
 }
 
