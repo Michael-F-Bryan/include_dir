@@ -1,9 +1,10 @@
-use std::io::{Write, Read};
+use std::io::{Write, Read, BufReader, BufWriter};
 use std::path::{Path, PathBuf};
 
 use files::File;
 use dirs::Dir;
 use errors::*;
+use helpers::Locatable;
 
 
 /// The object in charge of serializing `Files` and `Dirs` to some `io::Writer`.
@@ -12,7 +13,7 @@ pub struct Serializer<W>
     where W: Write
 {
     root: PathBuf,
-    writer: W,
+    writer: BufWriter<W>,
 }
 
 impl<W> Serializer<W>
@@ -22,16 +23,16 @@ impl<W> Serializer<W>
     pub fn new<P: AsRef<Path>>(root: P, writer: W) -> Serializer<W> {
         Serializer {
             root: PathBuf::from(root.as_ref()),
-            writer: writer,
+            writer: BufWriter::new(writer),
         }
     }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
         // TODO: Use a buffered reader here for easy perf gains
-        let contents = f.contents()?;
+        let contents = BufReader::new(f.contents()?);
         write!(self.writer,
-               r#"File {{ name: "{}", contents: &["#,
-               f.name().display())?;
+               r#"File {{ path: "{}", contents: &["#,
+               f.name().relative_to(&self.root)?.display())?;
 
         for byte in contents.bytes() {
             write!(self.writer, "{}, ", byte?)?;
@@ -52,7 +53,9 @@ impl<W> Serializer<W>
     }
 
     fn write_dir(&mut self, d: &Dir) -> Result<&mut Self> {
-        write!(self.writer, r#"Dir {{ name: "{}", files: &["#, d.name())?;
+        write!(self.writer,
+               r#"Dir {{ path: "{}", files: &["#,
+               d.path().relative_to(&self.root)?.display())?;
 
         for file in d.files() {
             self.write_file(file)?;
@@ -76,9 +79,23 @@ impl<W> Serializer<W>
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
         writeln!(self.writer,
                  "pub struct File {{
-                    pub name: &'static str,
+                    pub path: &'static str,
                     pub contents: &'static [u8]
                 }}")?;
+
+        writeln!(self.writer,
+                 "{}",
+                 "impl File {
+                     /// Get the file's path.
+                     #[inline]
+                     pub fn path(&self) -> &::std::path::Path {
+                         self.path.as_ref()
+                     }
+
+                    pub fn name(&self) -> &str {
+                        self.path().file_name().unwrap().to_str().unwrap()
+                    }
+                }")?;
 
         Ok(self)
     }
@@ -91,7 +108,7 @@ impl<W> Serializer<W>
         writeln!(self.writer, "#[derive(Clone, Debug, Hash, PartialEq)]")?;
         writeln!(self.writer,
                  "pub struct Dir {{
-                    pub name: &'static str,
+                    pub path: &'static str,
                     pub files: &'static [File],
                     pub subdirs: &'static [Dir]
                   }}")?;
@@ -104,7 +121,7 @@ impl<W> Serializer<W>
             /// Find a file which *exactly* matches the provided name.
             pub fn find(&'static self, name: &str) -> Option<&'static File> {
                 for file in self.files {
-                    if file.name == name {
+                    if file.name() == name {
                         return Some(file);
                     }
                 }
@@ -140,6 +157,15 @@ impl<W> Serializer<W>
             {
                 DirWalker::new(self)
             }
+
+            /// Get the directory's name.
+            pub fn name(&self) -> &str {
+                self.path().file_name().map(|s| s.to_str().unwrap()).unwrap_or("")
+            }
+
+            pub fn path(&self) -> &::std::path::Path {
+                self.path.as_ref()
+            }
         }"#)?;
 
         Ok(self)
@@ -162,8 +188,16 @@ impl<W> Serializer<W>
                      /// Get the entry's name.
                      pub fn name(&self) -> &str {
                          match *self {
-                             DirEntry::Dir(d) => d.name,
-                             DirEntry::File(f) => f.name,
+                             DirEntry::Dir(d) => d.name(),
+                             DirEntry::File(f) => f.name(),
+                         }
+                     }
+                     
+                     /// Get the entry's path relative to the root directory.
+                     pub fn path(&self) -> &::std::path::Path {
+                         match *self {
+                             DirEntry::Dir(d) => d.path(),
+                             DirEntry::File(f) => f.path(),
                          }
                      }
                  }")?;
