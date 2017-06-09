@@ -17,6 +17,19 @@ impl Options {
         self.ignore.push(name.to_string());
         self
     }
+
+    fn is_ignored<P: AsRef<Path>>(&self, path: P) -> bool {
+        for ignore in &self.ignore {
+            println!("Checking if {} is ignored by {}",
+                     path.as_ref().display(),
+                     ignore);
+            if path.as_ref() == PathBuf::from(ignore) {
+                return true;
+            }
+        }
+
+        false
+    }
 }
 
 pub fn include_dir_with_options<P: AsRef<Path>>(root: P, options: Options) -> Result<Dir> {
@@ -57,11 +70,17 @@ fn dirs_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<Dir>> {
 }
 
 fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>> {
-    root.as_ref()
+    let file_paths = root.as_ref()
         .read_dir()?
         .filter_map(|dir_entry| dir_entry.ok())
         .map(|dir_entry| dir_entry.path())
-        .filter(|p| p.is_file())
+        .filter(|p| p.is_file());
+
+    file_paths
+        .filter(|p| {
+                    let relative_path = p.strip_prefix(root.as_ref()).unwrap();
+                    !options.is_ignored(relative_path)
+                })
         .map(include_file)
         .collect()
 }
@@ -137,5 +156,16 @@ mod tests {
 
         assert_eq!(dir.subdirs[0].subdirs.len(), 0);
         assert_eq!(dir.subdirs[0].files.len(), 0);
+    }
+
+    #[test]
+    fn ignore_files() {
+        let mut options = Options::new();
+        options.ignore("lib.rs");
+
+        let src_directory = concat!(env!("CARGO_MANIFEST_DIR"), "/src/");
+        let files = files_in_dir(&src_directory, &options).unwrap();
+
+        assert!(files.iter().all(|f| f.name() != "libs.rs"));
     }
 }
