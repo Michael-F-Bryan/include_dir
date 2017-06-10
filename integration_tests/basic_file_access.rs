@@ -31,6 +31,8 @@ fn main() {
     for dir in ASSETS.subdirs {
         println!("\t{}", dir.path().display());
     }
+
+    println!("Asset directory contains {} bytes", ASSETS.size());
 }
 
 mod assets {

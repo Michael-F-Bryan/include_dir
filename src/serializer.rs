@@ -173,6 +173,13 @@ impl<W> Serializer<W>
             pub fn path(&self) -> &::std::path::Path {
                 self.path.as_ref()
             }
+
+            /// Get the total size of this directory and its contents in bytes.
+            pub fn size(&self) -> usize {
+                let file_size = self.files.iter().map(|f| f.contents.len()).sum();
+                
+                self.subdirs.iter().fold(file_size, |acc, d| acc + d.size())
+            }
         }"#)?;
 
         Ok(self)
