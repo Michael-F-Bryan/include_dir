@@ -210,6 +210,15 @@ class IntegrationTest:
                     context["dependencies"].append(match.group(1))
 
         logging.debug("(%s) Analysis %s", self.name, context)
+
+        # Make sure the "root" variable is a Path
+        if not isinstance(context["root"], Path):
+            context["root"] = Path(context["root"])
+
+        if not context["root"].exists():
+            logging.warning("(%s) embedded directory doesn't exist, \"%s\"",
+                            self.name,
+                            context["root"])
         return context
 
     def _copy_across_cache(self):

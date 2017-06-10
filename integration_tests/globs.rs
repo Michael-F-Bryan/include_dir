@@ -1,4 +1,4 @@
-// I'm using a django project on my local machine
+// I'm embedding a Django project which is on my local machine.
 // ROOT: /home/michael/Documents/website
 // FEATURE: globs
 // IGNORE: .git __pycache__
