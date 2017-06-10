@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """
 Usage:
-    ./integration_tests.py
-    ./integration_tests.py <patterns>...
+    ./integration_tests.py [options] [<patterns>...]
 
 Options:
-    -h, --help               Print this help information.
+    -h --help               Print this help information.
+    -d --debug              Enable debug mode.
+    -s --sequential         Runs the tests sequentially instead of in parallel.
 
 
 Because a large part of this crate's functionality depends on generated code,
@@ -32,19 +33,16 @@ import tempfile
 import logging
 import shutil
 import re
-import time
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 
+from dateutil.relativedelta import relativedelta
 from docopt import docopt
 import jinja2
 
 DEBUG = False
 
 project_root = Path(os.path.abspath(__file__)).parent
-
-logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s', 
-                    datefmt='%m/%d/%Y %I:%M:%S %p',
-                    level=logging.DEBUG if DEBUG else logging.INFO)
 
 BUILD_RS_TEMPLATE = """
 extern crate include_dir;
@@ -143,6 +141,7 @@ class IntegrationTest:
         """
         Run the test, checking whether it passes or fails (non-zero exit code).
         """
+        start = datetime.now()
         logging.info('Running test "%s"', self.name)
 
         cmd = ["cargo", "run"]
@@ -155,12 +154,13 @@ class IntegrationTest:
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
 
+        duration = human_readable(relativedelta(datetime.now(), start))
+
         if output.returncode != 0:
-            logging.error('%-20s\t✘', self.name)
+            logging.error("%-20s\t✘\t(%s)", self.name, duration)
             pretty_print_output(self.name, output)
         else:
-            logging.info('%-20s\t✔', self.name)
-
+            logging.info("%-20s\t✔\t(%s)", self.name, duration)
 
     def _generate_build_rs(self, analysis):
         logging.debug("(%s) Generating build.rs (assets: %s)", self.name, analysis["root"])
@@ -182,6 +182,8 @@ class IntegrationTest:
                 "include_dir_path": project_root,
                 "dependencies": analysis["dependencies"],
             }
+            feat = analysis.get("features", [])
+            context["features"] = feat if isinstance(feat, list) else [feat]
             f.write(template.render(context))
 
     def _analyse_script(self):
@@ -197,7 +199,7 @@ class IntegrationTest:
         with open(self.script) as f:
             for line in f:
                 for name, keyword in keywords.items():
-                    pattern = re.compile(r"// {}:(\s+[\w\d]+)+".format(keyword))
+                    pattern = re.compile(r"// {}:(\s+[^\s]+)+".format(keyword))
                     match = pattern.search(line)
                     if match:
                         values = [v.strip() for v in match.groups()]
@@ -207,7 +209,16 @@ class IntegrationTest:
                 if match:
                     context["dependencies"].append(match.group(1))
 
-        logging.debug("(%s) Context: %s", self.name, context)
+        logging.debug("(%s) Analysis %s", self.name, context)
+
+        # Make sure the "root" variable is a Path
+        if not isinstance(context["root"], Path):
+            context["root"] = Path(context["root"])
+
+        if not context["root"].exists():
+            logging.warning("(%s) embedded directory doesn't exist, \"%s\"",
+                            self.name,
+                            context["root"])
         return context
 
     def _copy_across_cache(self):
@@ -225,7 +236,10 @@ class IntegrationTest:
 
 
 def discover_integration_tests(patterns):
-    # Use a reasonable default if no patterns provided
+    """
+    Find all the tests in the integration_tests directory which satisfy the
+    provided pattern. If no pattern is provided, use a default of `*.rs`.
+    """
     if not patterns:
         patterns = ['*.rs']
 
@@ -244,19 +258,44 @@ def run_test(test):
     test.initialize()
     test.run()
 
+def human_readable(delta):
+    attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
+    ret = []
+    for attr in attrs:
+        value = getattr(delta, attr)
+        if value:
+            ret.append("{} {}".format(value, attr if value > 1 else attr[:-1]))
+        
+    return " and ".join(ret)
+
+
 def main(args):
+    start = datetime.now()
+
     patterns = args["<patterns>"]
     tests = list(discover_integration_tests(patterns))
 
-    if len(tests) == 0:
+    if not tests:
         logging.warning("No tests match the provided pattern")
 
-    for test in tests:
-        run_test(test)
-    # with ThreadPoolExecutor() as pool:
-    #     pool.map(run_test, tests)
+    if args['--sequential']:
+        for test in tests:
+            run_test(test)
+    else:
+        with ThreadPoolExecutor() as pool:
+            pool.map(run_test, tests)
+        
+    duration = relativedelta(datetime.now(), start)
+    logging.info("Tests completed in %s", human_readable(duration))
+
 
 if __name__ == "__main__":
     options = docopt(__doc__)
+    if options["--debug"]:
+        DEBUG = True
+
+    logging.basicConfig(format='%(asctime)s %(levelname)6s: %(message)s',
+                        datefmt='%m/%d/%Y %I:%M:%S %p',
+                        level=logging.DEBUG if DEBUG else logging.INFO)
     main(options)
 

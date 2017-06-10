@@ -40,6 +40,28 @@
 //! generation, the best reference for features and examples will be the
 //! [integration tests] directory.
 //!
+//!
+//! # Features
+//!
+//! By default `include_dir` requires no extra runtime dependencies. This is
+//! great because you just need to run the build script and include the
+//! generated file and then have full access access to the embedded assets,
+//! however it does limit your ability to access some nice features.
+//!
+//! ## Glob Search
+//!
+//! This feature adds the ability to search for files using glob patterns. It
+//! requires you to add `extern crate glob` to the top of your `lib.rs` or '
+//! `main.rs`, and is accessible using the `globs` feature flag.
+//!
+//! ```rust,ignore
+//! extern crate glob;
+//!
+//! for entry in ASSETS.glob("*.rs")? {
+//!     println!("{}", entry.path().display());
+//! }
+//! ```
+//!
 //! [integration tests]: https://github.com/Michael-F-Bryan/include_dir/tree/master/integration_tests
 
 #![deny(missing_docs,

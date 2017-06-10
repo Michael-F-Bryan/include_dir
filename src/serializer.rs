@@ -101,6 +101,11 @@ impl<W> Serializer<W>
                     pub fn as_reader(&self) -> ::std::io::Cursor<&[u8]> {
                         ::std::io::Cursor::new(&self.contents)
                     }
+
+                    /// The total size of this file in bytes.
+                    pub fn size(&self) -> usize {
+                        self.contents.len()
+                    }
                 }")?;
 
         Ok(self)
@@ -172,6 +177,13 @@ impl<W> Serializer<W>
             /// The directory's full path relative to the root.
             pub fn path(&self) -> &::std::path::Path {
                 self.path.as_ref()
+            }
+
+            /// Get the total size of this directory and its contents in bytes.
+            pub fn size(&self) -> usize {
+                let file_size = self.files.iter().map(|f| f.size()).sum();
+                
+                self.subdirs.iter().fold(file_size, |acc, d| acc + d.size())
             }
         }"#)?;
 
@@ -276,10 +288,89 @@ impl<W> Serializer<W>
         Ok(self)
     }
 
+    #[cfg(feature = "globs")]
+    fn write_globs(&mut self) -> Result<&mut Self> {
+        writeln!(self.writer,
+                 "{}",
+                 "
+                /// An iterator over all `DirEntries` which match the specified
+                /// pattern.
+                ///
+                /// # Note
+                /// 
+                /// You probably don't want to use this directly. Instead, you'll
+                /// want the [`Dir::glob()`] method.
+                /// 
+                /// [`Dir::glob()`]: struct.Dir.html#method.glob
+                pub struct Globs<'a> {
+                    walker: DirWalker<'a>,
+                    pattern: ::glob::Pattern,
+                }")?;
+        writeln!(self.writer,
+                 "{}",
+                 r#"
+                 impl<'a> Iterator for Globs<'a> {
+                    type Item = DirEntry<'a>;
+                    fn next(&mut self) -> Option<Self::Item> {
+                        while let Some(entry) = self.walker.next() {
+                            if self.pattern.matches_path(entry.path()) {
+                                return Some(entry);
+                            }
+                        }
+
+                        None
+                    }
+                 }
+        "#)?;
+
+        writeln!(self.writer,
+                 "{}",
+                 r#"impl Dir {
+                    /// Find all `DirEntries` which match a glob pattern.
+                    ///
+                    /// # Note
+                    /// 
+                    /// This may fail if you pass in an invalid glob pattern,
+                    /// consult the [glob docs] for more info on what a valid
+                    /// pattern is.
+                    ///
+                    /// # Examples
+                    ///
+                    /// ```rust,ignore
+                    /// use handlebars::Handlebars;
+                    /// let mut handlebars = Handlebars::new();
+                    ///
+                    /// for entry in ASSETS.glob("*.hbs")? {
+                    ///     if let DirEntry::File(f) = entry {
+                    ///         let template_string = String::from_utf8(f.contents.to_vec())?;
+                    ///         handlebars.register_template_string(f.name(),template_string)?;
+                    ///     }
+                    /// }
+                    /// ```
+                    /// 
+                    /// [glob docs]: https://doc.rust-lang.org/glob/glob/struct.Pattern.html
+                    pub fn glob<'a>(&'a self, pattern: &str) -> Result<Globs<'a>, Box<::std::error::Error>> {
+                        let pattern = ::glob::Pattern::new(pattern)?;
+                        Ok(Globs {
+                            walker: self.walk(),
+                            pattern: pattern,
+                        })
+                    }
+            }"#)?;
+
+        Ok(self)
+    }
+
+    #[cfg(not(feature = "globs"))]
+    fn write_globs(&mut self) -> Result<&mut Self> {
+        Ok(self)
+    }
+
     pub fn write_definitions(&mut self) -> Result<&mut Self> {
         self.write_file_definition()?
             .write_dir_definition()?
             .write_dirwalker_definition()?
+            .write_globs()?
             .write_direntry_definition()?;
 
         Ok(self)
@@ -298,7 +389,10 @@ mod tests {
     use dirs::include_dir;
 
     macro_rules! compile_and_test {
-        ($name:ident, |$ser:ident| $setup_serializer:expr) => (
+        ($( #[$attr:meta] )* $name:ident, |$ser:ident| $setup_serializer:expr) => (
+            $(
+                #[$attr]
+            )*
             #[test]
             fn $name() {
                 fn inner() -> Result<()> {
@@ -401,8 +495,7 @@ mod tests {
     }
 
     compile_and_test!(compile_file_definition, |ser| ser.write_file_definition()?);
-
-    compile_and_test!(compile_dir_definition, |ser| ser.write_definitions()?);
+    compile_and_test!(compile_all_definitions, |ser| ser.write_definitions()?);
 
 
     compile_and_test!(compile_a_dir_and_save_it_as_a_constant, |ser| {

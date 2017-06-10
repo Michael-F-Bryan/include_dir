@@ -27,3 +27,7 @@ glob = "0.2.11"
 [dev-dependencies]
 tempdir = "0.3.5"
 tempfile = "2.1.5"
+
+[features]
+default = []
+globs = []
