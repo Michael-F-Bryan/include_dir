@@ -18,9 +18,6 @@ fn main() {
             DirEntry::File(f) => println!("{}\t({} bytes)", f.path().display(), f.contents.len()),
         }
     }
-
-    let lib_star: Vec<_> = ASSETS.glob("lib.*").unwrap().collect();
-    assert_eq!(lib_star.len(), 1);
 }
 
 #[allow(dead_code)]

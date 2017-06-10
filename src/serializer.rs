@@ -101,6 +101,11 @@ impl<W> Serializer<W>
                     pub fn as_reader(&self) -> ::std::io::Cursor<&[u8]> {
                         ::std::io::Cursor::new(&self.contents)
                     }
+
+                    /// The total size of this file in bytes.
+                    pub fn size(&self) -> usize {
+                        self.contents.len()
+                    }
                 }")?;
 
         Ok(self)
@@ -176,7 +181,7 @@ impl<W> Serializer<W>
 
             /// Get the total size of this directory and its contents in bytes.
             pub fn size(&self) -> usize {
-                let file_size = self.files.iter().map(|f| f.contents.len()).sum();
+                let file_size = self.files.iter().map(|f| f.size()).sum();
                 
                 self.subdirs.iter().fold(file_size, |acc, d| acc + d.size())
             }
@@ -287,10 +292,20 @@ impl<W> Serializer<W>
     fn write_globs(&mut self) -> Result<&mut Self> {
         writeln!(self.writer,
                  "{}",
-                 "pub struct Globs<'a> {
-                     walker: DirWalker<'a>,
-                     pattern: ::glob::Pattern,
-                 }")?;
+                 "
+                /// An iterator over all `DirEntries` which match the specified
+                /// pattern.
+                ///
+                /// # Note
+                /// 
+                /// You probably don't want to use this directly. Instead, you'll
+                /// want the [`Dir::glob()`] method.
+                /// 
+                /// [`Dir::glob()`]: struct.Dir.html#method.glob
+                pub struct Globs<'a> {
+                    walker: DirWalker<'a>,
+                    pattern: ::glob::Pattern,
+                }")?;
         writeln!(self.writer,
                  "{}",
                  r#"
@@ -310,7 +325,30 @@ impl<W> Serializer<W>
 
         writeln!(self.writer,
                  "{}",
-                 "impl Dir {
+                 r#"impl Dir {
+                    /// Find all `DirEntries` which match a glob pattern.
+                    ///
+                    /// # Note
+                    /// 
+                    /// This may fail if you pass in an invalid glob pattern,
+                    /// consult the [glob docs] for more info on what a valid
+                    /// pattern is.
+                    ///
+                    /// # Examples
+                    ///
+                    /// ```rust,ignore
+                    /// use handlebars::Handlebars;
+                    /// let mut handlebars = Handlebars::new();
+                    ///
+                    /// for entry in ASSETS.glob("*.hbs")? {
+                    ///     if let DirEntry::File(f) = entry {
+                    ///         let template_string = String::from_utf8(f.contents.to_vec())?;
+                    ///         handlebars.register_template_string(f.name(),template_string)?;
+                    ///     }
+                    /// }
+                    /// ```
+                    /// 
+                    /// [glob docs]: https://doc.rust-lang.org/glob/glob/struct.Pattern.html
                     pub fn glob<'a>(&'a self, pattern: &str) -> Result<Globs<'a>, Box<::std::error::Error>> {
                         let pattern = ::glob::Pattern::new(pattern)?;
                         Ok(Globs {
@@ -318,7 +356,7 @@ impl<W> Serializer<W>
                             pattern: pattern,
                         })
                     }
-            }")?;
+            }"#)?;
 
         Ok(self)
     }
