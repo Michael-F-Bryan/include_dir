@@ -31,7 +31,7 @@ impl<W> Serializer<W>
         // TODO: Use a buffered reader here for easy perf gains
         let contents = BufReader::new(f.contents()?);
         write!(self.writer,
-               r#"File {{ path: "{}", contents: &["#,
+               r#"File {{ path: r"{}", contents: &["#,
                f.name().relative_to(&self.root)?.display())?;
 
         for byte in contents.bytes() {
@@ -54,7 +54,7 @@ impl<W> Serializer<W>
 
     fn write_dir(&mut self, d: &Dir) -> Result<&mut Self> {
         write!(self.writer,
-               r#"Dir {{ path: "{}", files: &["#,
+               r#"Dir {{ path: r"{}", files: &["#,
                d.path().relative_to(&self.root)?.display())?;
 
         for file in d.files() {
