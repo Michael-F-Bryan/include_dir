@@ -41,11 +41,13 @@ fn main() {
 - Embed a directory tree into your binary at compile time
 - Find a file in the embedded directory
 - Walk the directory tree, similar to the [walkdir] crate
+- Search for files using a glob pattern (requires the `globs` feature)
+- Ignore items matching a provided pattern (still has a couple bugs, YMMV)
+- Rustdoc documentation for all generated types and their methods
 
 To-Do list:
 
 - Embed multiple directories without doubling up any struct definitions
-- Ignore items matching a provided pattern
 - File metadata
 - Compression
 - `include_dir!()` proc macro?
