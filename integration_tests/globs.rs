@@ -1,23 +1,26 @@
+// I'm using a django project on my local machine
+// ROOT: /home/michael/Documents/website
 // FEATURE: globs
-// IGNORE: .git target
+// IGNORE: .git __pycache__
 
 extern crate glob;
-use assets::ASSETS;
+use assets::{ASSETS, DirEntry};
 
 fn main() {
-    // Using globs gives you back an iterator over all the matches
-    let rust_files: Vec<_> = ASSETS.glob("*.rs").unwrap().collect();
-    assert!(rust_files.len() > 0,
-            "I'm pretty sure there should be some rust files around here somewhere...");
-
-    for file in rust_files {
-        println!("{}", file.path().display());
+    for entry in ASSETS.glob("*.py").unwrap() {
+        match entry {
+            DirEntry::Dir(d) => {
+                println!("{}\tfiles: {}, subdirs: {}",
+                         d.path().display(),
+                         d.files.len(),
+                         d.subdirs.len())
+            }
+            DirEntry::File(f) => println!("{}\t({} bytes)", f.path().display(), f.contents.len()),
+        }
     }
 
     let lib_star: Vec<_> = ASSETS.glob("lib.*").unwrap().collect();
     assert_eq!(lib_star.len(), 1);
-
-    panic!();
 }
 
 #[allow(dead_code)]
