@@ -97,6 +97,12 @@ pub struct Dir {
 
 
 impl Dir {
+    /// Get the directory's name
+    #[allow(dead_code)]
+    pub fn name(&self) -> &str {
+        self.path.file_name().unwrap().to_str().unwrap()
+    }
+
     /// The files in this directory.
     pub fn files(&self) -> &[File] {
         &self.files
