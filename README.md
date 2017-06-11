@@ -11,6 +11,10 @@
 An extension to the `include_str!()` macro for embedding an entire directory
 tree into your binary.
 
+Rendered Documentation:
+
+- [master](https://michael-f-bryan.github.io/include_dir)
+- [Latest Release](https://docs.rs/include_dir/)
 
 ## Getting Started
 
