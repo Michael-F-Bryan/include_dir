@@ -139,7 +139,7 @@ class IntegrationTest:
 
     def run(self):
         """
-        Run the test, checking whether it passes or fails (non-zero exit code).
+        Run the test, checking to see that it passes (non-zero exit code).
         """
         start = datetime.now()
         logging.info('Running test "%s"', self.name)
@@ -159,8 +159,10 @@ class IntegrationTest:
         if output.returncode != 0:
             logging.error("%-20s\t✘\t(%s)", self.name, duration)
             pretty_print_output(self.name, output)
+            return False
         else:
             logging.info("%-20s\t✔\t(%s)", self.name, duration)
+            return True
 
     def _generate_build_rs(self, analysis):
         logging.debug("(%s) Generating build.rs (assets: %s)", self.name, analysis["root"])
@@ -256,7 +258,7 @@ def discover_integration_tests(patterns):
 
 def run_test(test):
     test.initialize()
-    test.run()
+    return test.run()
 
 def human_readable(delta):
     attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
@@ -283,10 +285,14 @@ def main(args):
             run_test(test)
     else:
         with ThreadPoolExecutor() as pool:
-            pool.map(run_test, tests)
+            results = pool.map(run_test, tests)
         
     duration = relativedelta(datetime.now(), start)
     logging.info("Tests completed in %s", human_readable(duration))
+
+    finished_successfully = all(results)
+    if not finished_successfully:
+        sys.exit(1)
 
 
 if __name__ == "__main__":
