@@ -40,7 +40,6 @@ mod tests {
     use super::*;
     use std::io::{Seek, SeekFrom, Write};
     use tempfile::NamedTempFile;
-    //use tempdir::TempDir;
 
     fn dummy_file() -> NamedTempFile {
         let mut temp = NamedTempFile::new().unwrap();
