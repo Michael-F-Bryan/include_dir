@@ -40,6 +40,7 @@ mod tests {
     use super::*;
     use std::io::{Seek, SeekFrom, Write};
     use tempfile::NamedTempFile;
+    use tempdir::TempDir;
 
     fn dummy_file() -> NamedTempFile {
         let mut temp = NamedTempFile::new().unwrap();
@@ -62,8 +63,7 @@ mod tests {
 
     #[test]
     fn file_only_works_on_files() {
-        let path = "blah";
-
-        assert!(include_file(path).is_err());
+        let t = TempDir::new("blah").unwrap();
+        assert!(include_file(t.path()).is_err());
     }
 }
