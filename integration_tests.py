@@ -204,7 +204,7 @@ class IntegrationTest:
         context["root"] = project_root / "src"
         context["dependencies"] = []
 
-         with self.script.open() as f:
+        with self.script.open() as f:
             for line in f:
                 for name, keyword in keywords.items():
                     pattern = re.compile(r"// {}:(\s+[^\s]+)+".format(keyword))
