@@ -173,7 +173,7 @@ class IntegrationTest:
 
         build_rs = self.crate / "build.rs"
 
-        with open(build_rs, "w") as f:
+        with open(str(build_rs), "w") as f:
             build_template = jinja2.Template(BUILD_RS_TEMPLATE)
             f.write(build_template.render(analysis))
 
@@ -181,7 +181,7 @@ class IntegrationTest:
         logging.debug("(%s) Updating Cargo.toml", self.name)
         cargo_toml = self.crate / "Cargo.toml"
 
-        with open(cargo_toml, "w") as f:
+        with open(str(cargo_toml), "w") as f:
             template = jinja2.Template(CARGO_TOML_TEMPLATE)
             context = {
                 "name": self.name,
