@@ -7,7 +7,7 @@ keywords = ["include", "embed", "assets"]
 license = "MIT"
 name = "include_dir"
 repository = "https://github.com/Michael-F-Bryan/include_dir"
-version = "0.1.4"
+version = "0.1.5"
 
 [badges]
 
