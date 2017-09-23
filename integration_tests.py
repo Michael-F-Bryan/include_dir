@@ -153,16 +153,18 @@ class IntegrationTest:
         if DEBUG:
             cmd.append("--verbose")
 
-        output = subprocess.run(cmd,
+        proc = subprocess.Popen(cmd,
                                 cwd=self.crate,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
         duration = human_readable(relativedelta(datetime.now(), start))
 
-        if output.returncode != 0:
+        if proc.returncode != 0:
             logging.error("%-20s\t✘\t(%s)", self.name, duration)
-            pretty_print_output(self.name, output)
+            pretty_print_output(self.name, stdout, stderr)
             return False
         else:
             logging.info("%-20s\t✔\t(%s)", self.name, duration)
