@@ -84,16 +84,16 @@ features = {{ features }}
 {% endfor %}
 """
 
-def pretty_print_output(name, output):
+def pretty_print_output(name, stdout, stderr):
     logging.warning("return code: %d", output.returncode)
-    if output.stdout:
+    if stdout:
         logging.warn("stdout:")
-        for line in output.stdout.decode().split("\n"):
+        for line in stdout.decode().split("\n"):
             logging.warning("(%s) %s", name, line)
 
-    if output.stderr:
+    if stderr:
         logging.warning("stderr:")
-        for line in output.stderr.decode().split("\n"):
+        for line in stderr.decode().split("\n"):
             logging.warning("(%s) %s", name, line)
 
 
@@ -119,14 +119,16 @@ class IntegrationTest:
         if DEBUG:
             cmd.append("--verbose")
 
-        output = subprocess.run(cmd,
+        proc = subprocess.Popen(cmd,
                                 cwd=self.temp_dir.name,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
-        if output.returncode != 0:
+        if proc.returncode != 0:
             logging.error("Unable to create a new crate")
-            pretty_print_output(self.name, output)
+            pretty_print_output(self.name, stdout, stderr)
             return
 
         self.crate = Path(self.temp_dir.name) / crate_name

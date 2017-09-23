@@ -32,6 +32,7 @@ after_script:
 - ci/deploy.sh
 cache: 
   - cargo
+  - pip
 before_cache:
 - chmod -R a+r $HOME/.cargo
 notifications:
