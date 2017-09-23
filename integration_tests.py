@@ -175,7 +175,7 @@ class IntegrationTest:
 
         build_rs = self.crate / "build.rs"
 
-        with open(str(build_rs), "w") as f:
+        with build_rs.open("w") as f:
             build_template = jinja2.Template(BUILD_RS_TEMPLATE)
             f.write(build_template.render(analysis))
 
@@ -183,7 +183,7 @@ class IntegrationTest:
         logging.debug("(%s) Updating Cargo.toml", self.name)
         cargo_toml = self.crate / "Cargo.toml"
 
-        with open(str(cargo_toml), "w") as f:
+        with cargo_toml.open("w") as f:
             template = jinja2.Template(CARGO_TOML_TEMPLATE)
             context = {
                 "name": self.name,
@@ -204,7 +204,7 @@ class IntegrationTest:
         context["root"] = project_root / "src"
         context["dependencies"] = []
 
-        with open(str(self.script)) as f:
+         with self.script.open() as f:
             for line in f:
                 for name, keyword in keywords.items():
                     pattern = re.compile(r"// {}:(\s+[^\s]+)+".format(keyword))
@@ -287,10 +287,9 @@ def main(args):
         logging.warning("No tests match the provided pattern")
 
     if args['--sequential']:
-        for test in tests:
-            run_test(test)
+        results = [run_test(test) for test in tests]
     else:
-        with ThreadPoolExecutor() as pool:
+        with ThreadPoolExecutor(4) as pool:
             results = pool.map(run_test, tests)
         
     duration = relativedelta(datetime.now(), start)
