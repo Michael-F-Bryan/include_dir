@@ -1,5 +1,4 @@
 use std::path::{Path, PathBuf};
-use std::fs;
 use errors::*;
 use helpers::Locatable;
 
@@ -28,11 +27,6 @@ impl File {
     pub fn name(&self) -> &Path {
         &self.path
     }
-
-    /// The file's contents.
-    pub fn contents(&self) -> Result<fs::File> {
-        fs::File::open(&self.path).map_err(|e| e.into())
-    }
 }
 
 impl Locatable for File {
@@ -44,38 +38,32 @@ impl Locatable for File {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::io::{Seek, SeekFrom, Write, Read};
+    use std::io::{Seek, SeekFrom, Write};
     use tempfile::NamedTempFile;
     use tempdir::TempDir;
 
-    fn dummy_file() -> (PathBuf, NamedTempFile) {
+    fn dummy_file() -> NamedTempFile {
         let mut temp = NamedTempFile::new().unwrap();
 
         write!(temp, "Hello World!").unwrap();
         temp.seek(SeekFrom::Start(0)).unwrap();
 
-        (PathBuf::from(temp.path()), temp)
+        temp
     }
 
     #[test]
     fn new_file() {
-        let (path, mut f) = dummy_file();
+        let f = dummy_file();
 
-        let file = include_file(&path).unwrap();
+        let file = include_file(&f.path()).unwrap();
 
-        let mut file_contents = Vec::new();
-        f.read_to_end(&mut file_contents).unwrap();
-
-        let mut got = Vec::new();
-        file.contents().unwrap().read_to_end(&mut got).unwrap();
-        assert_eq!(got, file_contents);
-        assert_eq!(file.name(), path);
+        assert_eq!(file.name(), f.path());
+        f.close().unwrap();
     }
 
     #[test]
     fn file_only_works_on_files() {
         let t = TempDir::new("blah").unwrap();
-
         assert!(include_file(t.path()).is_err());
     }
 }
