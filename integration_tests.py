@@ -154,7 +154,7 @@ class IntegrationTest:
             cmd.append("--verbose")
 
         proc = subprocess.Popen(cmd,
-                                cwd=self.crate,
+                                cwd=str(self.crate),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
         proc.wait()
