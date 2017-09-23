@@ -27,10 +27,11 @@ impl<W> Serializer<W>
     }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
-        // TODO: Use a buffered reader here for easy perf gains
         write!(self.writer,
-               r#"        File {{ path: r"{}", contents: include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), r"/{}")) }}"#,
-               f.name().relative_to(&self.root)?.display(),
+               r#"File {{ 
+                path: r"{0}", 
+                contents: include_bytes!("{0}"), 
+                }}"#,
                f.name().display())?;
 
         Ok(self)

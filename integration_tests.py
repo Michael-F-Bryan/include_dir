@@ -27,6 +27,7 @@ will:
 """
 
 import os
+import sys
 from pathlib import Path
 import subprocess
 import tempfile
@@ -83,16 +84,16 @@ features = {{ features }}
 {% endfor %}
 """
 
-def pretty_print_output(name, output):
+def pretty_print_output(name, stdout, stderr):
     logging.warning("return code: %d", output.returncode)
-    if output.stdout:
+    if stdout:
         logging.warn("stdout:")
-        for line in output.stdout.decode().split("\n"):
+        for line in stdout.decode().split("\n"):
             logging.warning("(%s) %s", name, line)
 
-    if output.stderr:
+    if stderr:
         logging.warning("stderr:")
-        for line in output.stderr.decode().split("\n"):
+        for line in stderr.decode().split("\n"):
             logging.warning("(%s) %s", name, line)
 
 
@@ -118,19 +119,22 @@ class IntegrationTest:
         if DEBUG:
             cmd.append("--verbose")
 
-        output = subprocess.run(cmd,
+        proc = subprocess.Popen(cmd,
                                 cwd=self.temp_dir.name,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
-        if output.returncode != 0:
+        if proc.returncode != 0:
             logging.error("Unable to create a new crate")
-            pretty_print_output(self.name, output)
+            pretty_print_output(self.name, stdout, stderr)
             return
 
         self.crate = Path(self.temp_dir.name) / crate_name
 
-        shutil.copy(self.script, self.crate / "src" / "main.rs")
+        main_rs = self.crate / "src" / "main.rs"
+        shutil.copy(str(self.script), str(main_rs))
 
         analysis = self._analyse_script()
         self._generate_build_rs(analysis)
@@ -139,7 +143,7 @@ class IntegrationTest:
 
     def run(self):
         """
-        Run the test, checking whether it passes or fails (non-zero exit code).
+        Run the test, checking to see that it passes (non-zero exit code).
         """
         start = datetime.now()
         logging.info('Running test "%s"', self.name)
@@ -149,25 +153,29 @@ class IntegrationTest:
         if DEBUG:
             cmd.append("--verbose")
 
-        output = subprocess.run(cmd,
-                                cwd=self.crate,
+        proc = subprocess.Popen(cmd,
+                                cwd=str(self.crate),
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        proc.wait()
+        stdout, stderr = proc.communicate()
 
         duration = human_readable(relativedelta(datetime.now(), start))
 
-        if output.returncode != 0:
+        if proc.returncode != 0:
             logging.error("%-20s\t✘\t(%s)", self.name, duration)
-            pretty_print_output(self.name, output)
+            pretty_print_output(self.name, stdout, stderr)
+            return False
         else:
             logging.info("%-20s\t✔\t(%s)", self.name, duration)
+            return True
 
     def _generate_build_rs(self, analysis):
         logging.debug("(%s) Generating build.rs (assets: %s)", self.name, analysis["root"])
 
         build_rs = self.crate / "build.rs"
 
-        with open(build_rs, "w") as f:
+        with build_rs.open("w") as f:
             build_template = jinja2.Template(BUILD_RS_TEMPLATE)
             f.write(build_template.render(analysis))
 
@@ -175,7 +183,7 @@ class IntegrationTest:
         logging.debug("(%s) Updating Cargo.toml", self.name)
         cargo_toml = self.crate / "Cargo.toml"
 
-        with open(cargo_toml, "w") as f:
+        with cargo_toml.open("w") as f:
             template = jinja2.Template(CARGO_TOML_TEMPLATE)
             context = {
                 "name": self.name,
@@ -196,7 +204,7 @@ class IntegrationTest:
         context["root"] = project_root / "src"
         context["dependencies"] = []
 
-        with open(self.script) as f:
+        with self.script.open() as f:
             for line in f:
                 for name, keyword in keywords.items():
                     pattern = re.compile(r"// {}:(\s+[^\s]+)+".format(keyword))
@@ -256,7 +264,7 @@ def discover_integration_tests(patterns):
 
 def run_test(test):
     test.initialize()
-    test.run()
+    return test.run()
 
 def human_readable(delta):
     attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
@@ -279,14 +287,17 @@ def main(args):
         logging.warning("No tests match the provided pattern")
 
     if args['--sequential']:
-        for test in tests:
-            run_test(test)
+        results = [run_test(test) for test in tests]
     else:
-        with ThreadPoolExecutor() as pool:
-            pool.map(run_test, tests)
+        with ThreadPoolExecutor(4) as pool:
+            results = pool.map(run_test, tests)
         
     duration = relativedelta(datetime.now(), start)
     logging.info("Tests completed in %s", human_readable(duration))
+
+    finished_successfully = all(results)
+    if not finished_successfully:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

@@ -2,6 +2,11 @@ dist: trusty
 language: rust
 services: docker
 sudo: required
+addons:
+  apt:
+    packages:
+      - "python3"
+      - "python3-pip"
 env:
   global:
   - CRATE_NAME=include_dir
@@ -9,13 +14,8 @@ env:
 matrix:
   include:
   - env: TARGET=i686-unknown-linux-gnu
-  - env: TARGET=x86_64-apple-darwin
-    os: osx
   - env: TARGET=x86_64-unknown-linux-gnu
     rust: nightly
-  allow_failures:
-  - env: TARGET=x86_64-apple-darwin
-    os: osx
 before_install: set -e
 install:
 - sh ci/install.sh
@@ -27,6 +27,7 @@ after_script:
 - ci/deploy.sh
 cache: 
   - cargo
+  - pip
 before_cache:
 - chmod -R a+r $HOME/.cargo
 notifications:

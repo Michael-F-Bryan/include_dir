@@ -1,20 +1,18 @@
-// I'm embedding a Django project which is on my local machine.
-// ROOT: /home/michael/Documents/website
 // FEATURE: globs
-// IGNORE: .git __pycache__
+// IGNORE: .git target
 
 extern crate glob;
-use assets::{ASSETS, DirEntry};
+use assets::{DirEntry, ASSETS};
 
 fn main() {
-    for entry in ASSETS.glob("*.py").unwrap() {
+    for entry in ASSETS.glob("*.rs").unwrap() {
         match entry {
-            DirEntry::Dir(d) => {
-                println!("{}\tfiles: {}, subdirs: {}",
-                         d.path().display(),
-                         d.files.len(),
-                         d.subdirs.len())
-            }
+            DirEntry::Dir(d) => println!(
+                "{}\tfiles: {}, subdirs: {}",
+                d.path().display(),
+                d.files.len(),
+                d.subdirs.len()
+            ),
             DirEntry::File(f) => println!("{}\t({} bytes)", f.path().display(), f.contents.len()),
         }
     }
