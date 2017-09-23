@@ -133,7 +133,8 @@ class IntegrationTest:
 
         self.crate = Path(self.temp_dir.name) / crate_name
 
-        shutil.copy(self.script, self.crate / "src" / "main.rs")
+        main_rs = self.crate / "src" / "main.rs"
+        shutil.copy(self.script, str(main_rs))
 
         analysis = self._analyse_script()
         self._generate_build_rs(analysis)
