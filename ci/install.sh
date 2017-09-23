@@ -3,7 +3,7 @@
 set -ex
 
 dependencies() {
-  pip3 install --user ghp-import travis-cargo jinja2 docopt dateutil
+  pip3 install --user ghp-import travis-cargo jinja2 docopt python-dateutil
 }
 
 main() {
