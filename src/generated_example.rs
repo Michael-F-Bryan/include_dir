@@ -1,25 +1,44 @@
-pub static INTEGRATION_TESTS: Dir = Dir {
-    path: r"integration_tests",
+pub static SRC: Dir = Dir {
+    path: r".",
     files: &[
-File { 
-    path: r"globs.rs", 
-    contents: include_bytes!(r"../integration_tests/globs.rs"), 
-},
-File { 
-    path: r"walk.rs", 
-    contents: include_bytes!(r"../integration_tests/walk.rs"), 
-},
-File { 
-    path: r"basic_file_access.rs", 
-    contents: include_bytes!(r"../integration_tests/basic_file_access.rs"), 
-},
-File { 
-    path: r"find_file.rs", 
-    contents: include_bytes!(r"../integration_tests/find_file.rs"), 
-},
+        File {
+            path: r"lib.rs",
+            contents: include_bytes!(r"./lib.rs"),
+        },
+        File {
+            path: r"helpers.rs",
+            contents: include_bytes!(r"./helpers.rs"),
+        },
+        File {
+            path: r"serialized_std_definitions.rs",
+            contents: include_bytes!(r"./serialized_std_definitions.rs"),
+        },
+        File {
+            path: r"dirs.rs",
+            contents: include_bytes!(r"./dirs.rs"),
+        },
+        File {
+            path: r"files.rs",
+            contents: include_bytes!(r"./files.rs"),
+        },
+        File {
+            path: r"generated_example.rs",
+            contents: include_bytes!(r"./generated_example.rs"),
+        },
+        File {
+            path: r"serializer.rs",
+            contents: include_bytes!(r"./serializer.rs"),
+        },
+        File {
+            path: r"frontend.rs",
+            contents: include_bytes!(r"./frontend.rs"),
+        },
+        File {
+            path: r"serialized_globs_definitions.rs",
+            contents: include_bytes!(r"./serialized_globs_definitions.rs"),
+        },
     ],
-    subdirs: &[
-    ]
+    subdirs: &[],
 };
 
 /// A single static asset.
