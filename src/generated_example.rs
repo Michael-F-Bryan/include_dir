@@ -3,19 +3,19 @@ pub static INTEGRATION_TESTS: Dir = Dir {
     files: &[
 File { 
     path: r"globs.rs", 
-    contents: include_bytes!(r"/home/michael/Documents/include_dir/integration_tests/globs.rs"), 
+    contents: include_bytes!(r"../integration_tests/globs.rs"), 
 },
 File { 
     path: r"walk.rs", 
-    contents: include_bytes!(r"/home/michael/Documents/include_dir/integration_tests/walk.rs"), 
+    contents: include_bytes!(r"../integration_tests/walk.rs"), 
 },
 File { 
     path: r"basic_file_access.rs", 
-    contents: include_bytes!(r"/home/michael/Documents/include_dir/integration_tests/basic_file_access.rs"), 
+    contents: include_bytes!(r"../integration_tests/basic_file_access.rs"), 
 },
 File { 
     path: r"find_file.rs", 
-    contents: include_bytes!(r"/home/michael/Documents/include_dir/integration_tests/find_file.rs"), 
+    contents: include_bytes!(r"../integration_tests/find_file.rs"), 
 },
     ],
     subdirs: &[
