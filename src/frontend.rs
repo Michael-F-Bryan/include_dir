@@ -43,11 +43,12 @@ pub struct IncludeDirBuilder {
 ///   .to_file(dest_path)
 ///   .unwrap();
 /// ```
-pub fn include_dir(root: &str) -> IncludeDirBuilder {
-    let dir = dirs::include_dir(root);
+pub fn include_dir<P: AsRef<Path>>(dir_to_include: P) -> IncludeDirBuilder {
+    let dir_to_include = dir_to_include.as_ref();
+    let dir = dirs::include_dir(dir_to_include);
 
     let mut this = IncludeDirBuilder::default();
-    this.root = Some(PathBuf::from(root));
+    this.root = Some(dir_to_include.to_path_buf());
 
     match dir {
         Ok(d) => this.dir = Some(d),

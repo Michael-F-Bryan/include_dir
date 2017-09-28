@@ -1,4 +1,5 @@
 use std::io::{Write, BufWriter};
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use files::File;
@@ -27,12 +28,19 @@ impl<W> Serializer<W>
     }
 
     fn write_file(&mut self, f: &File) -> Result<&mut Self> {
+        let root = self.root.clone();
+        let relative_to_root = f.name().strip_prefix(&root)
+            .expect("Files will always be relative to their root");
+        let absolute = fs::canonicalize(f.name())
+            .chain_err(|| "Couldn't get a file's canonical name")?;
+
         write!(self.writer,
                r#"File {{ 
-                path: r"{0}", 
-                contents: include_bytes!("{0}"), 
-                }}"#,
-               f.name().display())?;
+    path: r"{}", 
+    contents: include_bytes!(r"{}"), 
+}}"#,
+               relative_to_root.display(),
+               absolute.display())?;
 
         Ok(self)
     }
