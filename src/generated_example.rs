@@ -1,5 +1,5 @@
-pub static SRC: Dir = Dir {
-    path: r"",
+pub static INTEGRATION_TESTS: Dir = Dir {
+    path: r"integration_tests",
     files: &[
 File { 
     path: r"globs.rs", 

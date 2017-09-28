@@ -9,12 +9,18 @@ pub trait Locatable {
         self.path()
             .strip_prefix(to.as_ref())
             .map(|p| PathBuf::from(p))
-            .map_err(Into::into)
+            .chain_err(|| {
+                format!(
+                    "Unable to resolve relative path for {}",
+                    self.path().display()
+                )
+            })
     }
 }
 
 impl<P> Locatable for P
-    where P: AsRef<Path>
+where
+    P: AsRef<Path>,
 {
     fn path(&self) -> &Path {
         self.as_ref()

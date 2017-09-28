@@ -1,3 +1,4 @@
+use std::env;
 use std::path::{Path, PathBuf};
 use glob::Pattern;
 
@@ -16,8 +17,7 @@ impl Options {
     }
 
     pub fn ignore(&mut self, name: &str) -> Result<&mut Self> {
-        let pattern = Pattern::new(name)
-            .chain_err(|| "Invalid glob pattern for ignore")?;
+        let pattern = Pattern::new(name).chain_err(|| "Invalid glob pattern for ignore")?;
 
         self.ignore.push(pattern);
         Ok(self)
@@ -30,21 +30,39 @@ impl Options {
 }
 
 pub fn include_dir_with_options<P: AsRef<Path>>(root: P, options: Options) -> Result<Dir> {
-    let full_name = PathBuf::from(root.as_ref());
+    let root = root.as_ref().to_path_buf();
+    let root = normalize_path(root);
 
-    if !full_name.is_dir() {
-        bail!("{} is not a directory", full_name.display());
+    if !root.is_dir() {
+        bail!("{} is not a directory", root.display());
     }
 
 
-    let files = files_in_dir(&full_name, &options)?;
-    let subdirs = dirs_in_dir(&full_name, &options)?;
+    let files = files_in_dir(&root, &options)?;
+    let subdirs = dirs_in_dir(&root, &options)?;
 
     Ok(Dir {
-           path: full_name,
-           subdirs: subdirs,
-           files: files,
-       })
+        path: root,
+        subdirs: subdirs,
+        files: files,
+    })
+}
+
+/// Try to make the path relative instead of absolute. This way builds will be
+/// more reproducible.
+fn normalize_path(path: PathBuf) -> PathBuf {
+    if path.is_absolute() {
+        println!("cargo:warning=Path is absolute, these tend to make builds hard to reproduce.");
+        println!("cargo:warning=Found {}", path.display());
+    }
+
+    if let Ok(cwd) = env::current_dir() {
+        if let Ok(normalized) = path.strip_prefix(&cwd) {
+            return normalized.to_path_buf();
+        }
+    }
+
+    path
 }
 
 /// Traverse a file tree, building up an in-memory representation of it.
@@ -59,9 +77,9 @@ fn dirs_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<Dir>> {
         .map(|entry| entry.path())
         .filter(|p| p.is_dir())
         .filter(|p| {
-                    let relative_path = p.relative_to(root.as_ref()).unwrap();
-                    !options.is_ignored(relative_path)
-                })
+            let relative_path = p.relative_to(root.as_ref()).unwrap();
+            !options.is_ignored(relative_path)
+        })
         .inspect(|p| println!("{}", p.display()));
 
     dirs.map(include_dir).collect()
@@ -77,12 +95,12 @@ fn files_in_dir<P: AsRef<Path>>(root: P, options: &Options) -> Result<Vec<File>>
     file_paths
         .map(include_file)
         .filter(|f| match *f {
-                    Ok(ref f) => {
-                        let relative_path = f.relative_to(root.as_ref()).unwrap();
-                        !options.is_ignored(relative_path)
-                    } 
-                    _ => true,
-                })
+            Ok(ref f) => {
+                let relative_path = f.relative_to(root.as_ref()).unwrap();
+                !options.is_ignored(relative_path)
+            }
+            _ => true,
+        })
         .collect()
 }
 
@@ -149,8 +167,10 @@ mod tests {
         let got_files = files_in_dir(&temp_path, &Options::new()).unwrap();
 
         assert_eq!(got_files.len(), 1);
-        assert_eq!(got_files[0].relative_to(&temp_path).unwrap(),
-                   PathBuf::from("file_1.txt"));
+        assert_eq!(
+            got_files[0].relative_to(&temp_path).unwrap(),
+            PathBuf::from("file_1.txt")
+        );
     }
 
     #[test]

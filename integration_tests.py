@@ -84,8 +84,9 @@ features = {{ features }}
 {% endfor %}
 """
 
-def pretty_print_output(name, stdout, stderr):
-    logging.warning("return code: %d", output.returncode)
+
+def pretty_print_output(name, stdout, stderr, returncode):
+    logging.warning("return code: %d", returncode)
     if stdout:
         logging.warn("stdout:")
         for line in stdout.decode().split("\n"):
@@ -101,6 +102,7 @@ class IntegrationTest:
     """
     A runner for an integration test.
     """
+
     def __init__(self, filename):
         self.script = filename.relative_to(project_root)
         self.name = self.script.stem
@@ -112,7 +114,8 @@ class IntegrationTest:
         Do all the work necessary to create a new project, copy across the test
         file, add a build script, then adjust Cargo.toml accordingly.
         """
-        logging.debug("(%s) Initializing test crate in %s", self.name, self.temp_dir.name)
+        logging.debug("(%s) Initializing test crate in %s",
+                      self.name, self.temp_dir.name)
         crate_name = self.name
 
         cmd = ["cargo", "new", "--bin", crate_name]
@@ -128,7 +131,7 @@ class IntegrationTest:
 
         if proc.returncode != 0:
             logging.error("Unable to create a new crate")
-            pretty_print_output(self.name, stdout, stderr)
+            pretty_print_output(self.name, stdout, stderr, proc.returncode)
             return
 
         self.crate = Path(self.temp_dir.name) / crate_name
@@ -164,14 +167,15 @@ class IntegrationTest:
 
         if proc.returncode != 0:
             logging.error("%-20s\t✘\t(%s)", self.name, duration)
-            pretty_print_output(self.name, stdout, stderr)
+            pretty_print_output(self.name, stdout, stderr, proc.returncode)
             return False
         else:
             logging.info("%-20s\t✔\t(%s)", self.name, duration)
             return True
 
     def _generate_build_rs(self, analysis):
-        logging.debug("(%s) Generating build.rs (assets: %s)", self.name, analysis["root"])
+        logging.debug("(%s) Generating build.rs (assets: %s)",
+                      self.name, analysis["root"])
 
         build_rs = self.crate / "build.rs"
 
@@ -211,7 +215,8 @@ class IntegrationTest:
                     match = pattern.search(line)
                     if match:
                         values = [v.strip() for v in match.groups()]
-                        context[name] = values if len(values) > 1 else values[0]
+                        context[name] = values if len(
+                            values) > 1 else values[0]
 
                 match = re.search(r"extern crate ([\w_]+)", line)
                 if match:
@@ -266,6 +271,7 @@ def run_test(test):
     test.initialize()
     return test.run()
 
+
 def human_readable(delta):
     attrs = ['years', 'months', 'days', 'hours', 'minutes', 'seconds']
     ret = []
@@ -273,7 +279,7 @@ def human_readable(delta):
         value = getattr(delta, attr)
         if value:
             ret.append("{} {}".format(value, attr if value > 1 else attr[:-1]))
-        
+
     return " and ".join(ret)
 
 
@@ -291,7 +297,7 @@ def main(args):
     else:
         with ThreadPoolExecutor(4) as pool:
             results = pool.map(run_test, tests)
-        
+
     duration = relativedelta(datetime.now(), start)
     logging.info("Tests completed in %s", human_readable(duration))
 
@@ -309,4 +315,3 @@ if __name__ == "__main__":
                         datefmt='%m/%d/%Y %I:%M:%S %p',
                         level=logging.DEBUG if DEBUG else logging.INFO)
     main(options)
-
