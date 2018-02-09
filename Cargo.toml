@@ -9,7 +9,10 @@ name = "include_dir"
 repository = "https://github.com/Michael-F-Bryan/include_dir"
 version = "0.1.5"
 
-[badges]
+
+[package.metadata.release]
+sign-commit = true
+tag-prefix = "v"
 
 [badges.appveyor]
 branch = "master"
