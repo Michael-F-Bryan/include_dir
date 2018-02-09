@@ -24,12 +24,12 @@ branch = "master"
 repository = "Michael-F-Bryan/include_dir"
 
 [dependencies]
-error-chain = "^0.11.0"
-glob = "^0.2.11"
+error-chain = "0.11"
+glob = "0.2"
 
 [dev-dependencies]
-tempdir = "^0.3.5"
-tempfile = "^2.1.6"
+tempdir = "0.3"
+tempfile = "2.2"
 
 [features]
 default = []
