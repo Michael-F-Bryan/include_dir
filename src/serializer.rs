@@ -30,7 +30,7 @@ impl<W> Serializer<W>
         write!(self.writer,
                r#"File {{ 
                 path: r"{0}", 
-                contents: include_bytes!("{0}"), 
+                contents: include_bytes!(r"{0}"),
                 }}"#,
                f.name().display())?;
 
