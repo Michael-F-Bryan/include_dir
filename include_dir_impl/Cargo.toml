@@ -1,0 +1,11 @@
+[package]
+name = "include_dir_impl"
+version = "0.1.0"
+authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
+description = "Implementation crate for include_dir"
+
+[dependencies]
+proc-macro-hack = "0.4"
+
+[lib]
+proc-macro = true

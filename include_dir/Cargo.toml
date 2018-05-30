@@ -1,0 +1,8 @@
+[package]
+name = "include_dir"
+version = "0.1.0"
+authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
+
+[dependencies]
+include_dir_impl = { path = "../include_dir_impl" }
+proc-macro-hack = "0.4"
