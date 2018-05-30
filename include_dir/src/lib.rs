@@ -1,7 +1,10 @@
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
+extern crate failure;
+extern crate proc_macro2;
+extern crate proc_macro_hack;
+extern crate quote;
+
+mod dir;
+mod file;
+
+pub use dir::Dir;
+pub use file::File;

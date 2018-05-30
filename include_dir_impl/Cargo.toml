@@ -6,6 +6,7 @@ description = "Implementation crate for include_dir"
 
 [dependencies]
 proc-macro-hack = "0.4"
+syn = "0.14.1"
 
 [lib]
 proc-macro = true
