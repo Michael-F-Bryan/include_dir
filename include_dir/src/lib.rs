@@ -1,10 +1,15 @@
-extern crate failure;
-extern crate proc_macro2;
+extern crate include_dir_core;
+#[allow(unused_imports)]
+#[macro_use]
+extern crate include_dir_impl;
+#[macro_use]
 extern crate proc_macro_hack;
-extern crate quote;
 
-mod dir;
-mod file;
+#[doc(inline)]
+pub use include_dir_core::{Dir, File};
+#[doc(hidden)]
+pub use include_dir_impl::*;
 
-pub use dir::Dir;
-pub use file::File;
+proc_macro_expr_decl! {
+    include_dir! => include_dir_impl
+}
