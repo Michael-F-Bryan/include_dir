@@ -1,35 +1,73 @@
+# Based on the "trust" template v0.1.2
+# https://github.com/japaric/trust/tree/v0.1.2
+
 dist: trusty
 language: rust
 services: docker
 sudo: required
-addons:
-  apt:
-    packages:
-      - "python3"
-      - "python3-pip"
+
 env:
   global:
-  - CRATE_NAME=include_dir
-  - secure: WuvfmNkBy4tn9cF/M0Vk6/+b+/xDH1niGz6K7JMFJHyNq5IrQZzwqw12cv1kk5GaIDE1IJtt+XVfZoDMwnncHpKYtyCZN/SM0X36WJaYM7IVb5MdrcGqUCqNQNn8TCi/c+qXThBT8dtm5xj8U3J34WphoUohkwSYG0D4nP+ucYOKIhOA9MlJ41+wC6rSX95Iw2CWErvRcT6gkRAaEduvxEJ1sFt8Zz2XwbZ+JYzXhYZGYc9Q//toHD10bXNGiwrV7fNiceu4+QGrdNJJb7dD9tQFAUd08lsNXzlYIacWYt8mK3rE/4tZLghvDNcLLCTr8UZf1ok1mbVthdjsU5paqt0x/vpvZapWbbRI89pZTHc+12hp9e0FDPWnZPAWMWJcC50gmcODkxaM1hxMRPTce0jVObkK06T10EkX3fmk+hF1QgF0mSrSgHHGJXCXS/U4n69uwREYVnCcLFTqK4Lol8fTGf8iTuPHM83xViZ2w5N10eemd4Rw3nBW86GCIaa9YqR+FdgEtz2Ns1nyfgAnCXMvbZ8DP2ltxi0vJmlcpdE5UOZHmb5nmVS65/w9aEPFJ9+fFZmuYExLykUXqyXrYBEP1p5mzXt1nPJPGmIlR+Ic32zGaTWaaEoMS4XbXLdqM6VU+YjO6tYnhv631LureW8yRyfRyj+J3OWt2r30mO0=
+    - CRATE_NAME=include_dir
+    - secure: WuvfmNkBy4tn9cF/M0Vk6/+b+/xDH1niGz6K7JMFJHyNq5IrQZzwqw12cv1kk5GaIDE1IJtt+XVfZoDMwnncHpKYtyCZN/SM0X36WJaYM7IVb5MdrcGqUCqNQNn8TCi/c+qXThBT8dtm5xj8U3J34WphoUohkwSYG0D4nP+ucYOKIhOA9MlJ41+wC6rSX95Iw2CWErvRcT6gkRAaEduvxEJ1sFt8Zz2XwbZ+JYzXhYZGYc9Q//toHD10bXNGiwrV7fNiceu4+QGrdNJJb7dD9tQFAUd08lsNXzlYIacWYt8mK3rE/4tZLghvDNcLLCTr8UZf1ok1mbVthdjsU5paqt0x/vpvZapWbbRI89pZTHc+12hp9e0FDPWnZPAWMWJcC50gmcODkxaM1hxMRPTce0jVObkK06T10EkX3fmk+hF1QgF0mSrSgHHGJXCXS/U4n69uwREYVnCcLFTqK4Lol8fTGf8iTuPHM83xViZ2w5N10eemd4Rw3nBW86GCIaa9YqR+FdgEtz2Ns1nyfgAnCXMvbZ8DP2ltxi0vJmlcpdE5UOZHmb5nmVS65/w9aEPFJ9+fFZmuYExLykUXqyXrYBEP1p5mzXt1nPJPGmIlR+Ic32zGaTWaaEoMS4XbXLdqM6VU+YjO6tYnhv631LureW8yRyfRyj+J3OWt2r30mO0=
+
 matrix:
   include:
-  - env: TARGET=i686-unknown-linux-gnu
-  - env: TARGET=x86_64-unknown-linux-gnu
-    rust: nightly
-before_install: set -e
+    # Linux
+    - env: TARGET=x86_64-unknown-linux-gnu
+
+    # OSX
+    - env: TARGET=i686-apple-darwin
+      os: osx
+
+    # *BSD
+    - env: TARGET=x86_64-unknown-freebsd DISABLE_TESTS=1
+
+    # Windows
+    - env: TARGET=x86_64-pc-windows-gnu
+
+    # Testing other channels
+    - env: TARGET=x86_64-unknown-linux-gnu
+      rust: nightly
+    - env: TARGET=x86_64-apple-darwin
+      os: osx
+      rust: nightly
+
+before_install:
+  - set -e
+  - rustup self update
+
 install:
-- sh ci/install.sh
-- source ~/.cargo/env || true
+  - sh ci/install.sh
+  - source ~/.cargo/env || true
+
 script:
-- bash ci/script.sh
-after_script:
-- set +e
-- ci/deploy.sh
-cache: 
-  - cargo
-  - pip
+  - bash ci/script.sh
+
+after_script: set +e
+
+before_deploy:
+  - sh ci/before_deploy.sh
+
+deploy:
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
+  on:
+    condition: $TRAVIS_RUST_VERSION = stable
+    tags: true
+  provider: releases
+  skip_cleanup: true
+
+cache: cargo
 before_cache:
-- chmod -R a+r $HOME/.cargo
+  - chmod -R a+r $HOME/.cargo
+
+branches:
+  only:
+    - /^v\d+\.\d+\.\d+.*$/
+    - master
+
 notifications:
   email:
     on_success: never
