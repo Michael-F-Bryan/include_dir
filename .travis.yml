@@ -46,19 +46,6 @@ script:
 
 after_script: set +e
 
-before_deploy:
-  - sh ci/before_deploy.sh
-
-deploy:
-  api_key: $GITHUB_TOKEN
-  file_glob: true
-  file: $CRATE_NAME-$TRAVIS_TAG-$TARGET.*
-  on:
-    condition: $TRAVIS_RUST_VERSION = stable
-    tags: true
-  provider: releases
-  skip_cleanup: true
-
 cache: cargo
 before_cache:
   - chmod -R a+r $HOME/.cargo
