@@ -1,9 +1,0 @@
-[package]
-name = "include_dir_core"
-version = "0.1.0"
-authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
-
-[dependencies]
-failure = "0.1.1"
-quote = "0.6.3"
-proc-macro2 = "0.4.4"

@@ -1,11 +1,16 @@
 #[macro_use]
 extern crate proc_macro_hack;
-extern crate include_dir_core;
+extern crate failure;
+extern crate proc_macro2;
 extern crate syn;
 #[macro_use]
 extern crate quote;
 
-use include_dir_core::Dir;
+mod dir;
+mod file;
+mod utils;
+
+use dir::Dir;
 use std::env;
 use std::path::PathBuf;
 use syn::LitStr;
@@ -18,9 +23,13 @@ proc_macro_expr_impl! {
         let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap();
 
         let path = PathBuf::from(crate_root)
-            .join(input.value())
-            .canonicalize()
-            .expect("Unable to normalize the path");
+            .join(input.value());
+
+        if !path.exists() {
+            panic!("\"{}\" doesn't exist", path.display());
+        }
+
+        let path = path.canonicalize().expect("Can't normalize the path");
 
         let dir = Dir::from_disk(&path).expect("Couldn't load the directory");
 

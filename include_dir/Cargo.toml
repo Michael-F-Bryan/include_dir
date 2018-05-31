@@ -5,5 +5,4 @@ authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
 
 [dependencies]
 include_dir_impl = { path = "../include_dir_impl" }
-include_dir_core = { path = "../include_dir_core" }
 proc-macro-hack = "0.4"

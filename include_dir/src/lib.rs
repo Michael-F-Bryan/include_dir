@@ -1,12 +1,15 @@
-extern crate include_dir_core;
 #[allow(unused_imports)]
 #[macro_use]
 extern crate include_dir_impl;
 #[macro_use]
 extern crate proc_macro_hack;
 
-#[doc(inline)]
-pub use include_dir_core::{Dir, File};
+mod dir;
+mod file;
+
+pub use dir::Dir;
+pub use file::File;
+
 #[doc(hidden)]
 pub use include_dir_impl::*;
 
