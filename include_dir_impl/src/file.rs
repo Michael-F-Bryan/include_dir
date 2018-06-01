@@ -3,8 +3,7 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use std::fs;
 use std::io::Read;
-use std::path::PathBuf;
-use utils;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct File {
@@ -24,11 +23,15 @@ impl File {
 
         Ok(File { path, contents })
     }
+
+    pub fn normalize(&mut self, root: &Path) {
+        self.path = self.path.strip_prefix(root).unwrap().to_path_buf();
+    }
 }
 
 impl ToTokens for File {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let path = utils::escape(&self.path);
+        let path = self.path.display().to_string();
         let contents = &self.contents;
 
         let tok = quote!{

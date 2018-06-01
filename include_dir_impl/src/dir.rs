@@ -2,8 +2,7 @@ use failure::{self, Error, ResultExt};
 use file::File;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use std::path::PathBuf;
-use utils;
+use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Dir {
@@ -35,11 +34,23 @@ impl Dir {
 
         Ok(Dir { path, files, dirs })
     }
+
+    pub fn normalize(&mut self, root: &Path) {
+        self.path = self.path.strip_prefix(root).unwrap().to_path_buf();
+
+        for file in &mut self.files {
+            file.normalize(root);
+        }
+
+        for dir in &mut self.dirs {
+            dir.normalize(root);
+        }
+    }
 }
 
 impl ToTokens for Dir {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let path = utils::escape(&self.path);
+        let path = self.path.display().to_string();
         let files = &self.files;
         let dirs = &self.dirs;
 

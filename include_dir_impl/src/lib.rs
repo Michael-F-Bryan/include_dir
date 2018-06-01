@@ -8,7 +8,6 @@ extern crate quote;
 
 mod dir;
 mod file;
-mod utils;
 
 use dir::Dir;
 use std::env;
@@ -31,7 +30,8 @@ proc_macro_expr_impl! {
 
         let path = path.canonicalize().expect("Can't normalize the path");
 
-        let dir = Dir::from_disk(&path).expect("Couldn't load the directory");
+        let mut dir = Dir::from_disk(&path).expect("Couldn't load the directory");
+        dir.normalize(&path);
 
         quote!(#dir).to_string()
     }
