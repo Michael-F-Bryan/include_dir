@@ -1,7 +1,6 @@
 //! An extension to the `include_str!()` macro for embedding an entire directory
 //! tree into your binary.
 //!
-//!
 //! # Examples
 //!
 //! The `include_dir!()` macro will include a directory **relative to the
@@ -31,6 +30,14 @@
 //!     println!("Found {}", entry.path().display());
 //! }
 //! # }
+//!
+//! # Features
+//!
+//! This library exposes a couple feature flags for enabling and disabling extra
+//! functionality. These are:
+//!
+//! - **globs:** enable the `Dir::find()` method using glob patterns
+//! - **example:** compile in an example of the embedded directory tree
 //! ```
 
 #[allow(unused_imports)]
