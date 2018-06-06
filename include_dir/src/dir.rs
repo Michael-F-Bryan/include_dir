@@ -1,14 +1,32 @@
 use file::File;
+use glob::{Pattern, PatternError};
+use globs::{DirEntry, Globs};
 use std::path::Path;
 
+/// A directory entry.
 #[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Dir {
-    pub path: &'static str,
-    pub files: &'static [File],
-    pub dirs: &'static [Dir],
+pub struct Dir<'a> {
+    #[doc(hidden)]
+    pub path: &'a str,
+    #[doc(hidden)]
+    pub files: &'a [File<'a>],
+    #[doc(hidden)]
+    pub dirs: &'a [Dir<'a>],
 }
 
-impl Dir {
+impl<'a> Dir<'a> {
+    pub fn path(&self) -> &'a Path {
+        Path::new(self.path)
+    }
+
+    pub fn files(&self) -> &'a [File<'a>] {
+        self.files
+    }
+
+    pub fn dirs(&self) -> &'a [Dir<'a>] {
+        self.dirs
+    }
+
     pub fn contains<S: AsRef<Path>>(&self, path: S) -> bool {
         let path = path.as_ref();
 
@@ -47,5 +65,18 @@ impl Dir {
         }
 
         None
+    }
+
+    pub fn find(&self, glob: &str) -> Result<impl Iterator<Item = DirEntry<'a>>, PatternError> {
+        let pattern = Pattern::new(glob)?;
+
+        Ok(Globs::new(pattern, *self))
+    }
+
+    pub(crate) fn dir_entries(&self) -> impl Iterator<Item = DirEntry<'a>> {
+        let files = self.files().into_iter().map(|f| DirEntry::File(*f));
+        let dirs = self.dirs().into_iter().map(|d| DirEntry::Dir(*d));
+
+        files.chain(dirs)
     }
 }

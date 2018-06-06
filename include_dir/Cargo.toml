@@ -1,8 +1,10 @@
 [package]
+authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
 name = "include_dir"
 version = "0.1.0"
-authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
-
 [dependencies]
-include_dir_impl = { path = "../include_dir_impl" }
+glob = "0.2.11"
 proc-macro-hack = "0.4"
+
+[dependencies.include_dir_impl]
+path = "../include_dir_impl"
