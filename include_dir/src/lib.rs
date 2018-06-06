@@ -30,6 +30,7 @@
 //!     println!("Found {}", entry.path().display());
 //! }
 //! # }
+//! ```
 //!
 //! # Features
 //!
@@ -38,7 +39,6 @@
 //!
 //! - **globs:** enable the `Dir::find()` method using glob patterns
 //! - **example:** compile in an example of the embedded directory tree
-//! ```
 
 #[allow(unused_imports)]
 #[macro_use]
@@ -49,6 +49,8 @@ extern crate glob;
 
 mod dir;
 mod file;
+#[cfg(feature = "example")]
+pub mod generated_example;
 mod globs;
 
 pub use dir::Dir;
@@ -60,3 +62,6 @@ pub use include_dir_impl::*;
 proc_macro_expr_decl! {
     include_dir! => include_dir_impl
 }
+
+// for use with `cargo expand >> src/generated_example.rs`
+//pub static INCLUDE_DIR_SRC: Dir = include_dir!(".");
