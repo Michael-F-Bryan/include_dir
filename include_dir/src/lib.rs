@@ -37,8 +37,9 @@
 //! This library exposes a couple feature flags for enabling and disabling extra
 //! functionality. These are:
 //!
-//! - **globs:** enable the `Dir::find()` method using glob patterns
 //! - **example:** compile in an example of the embedded directory tree
+
+#![deny(missing_docs, missing_copy_implementations, missing_debug_implementations)]
 
 #[allow(unused_imports)]
 #[macro_use]

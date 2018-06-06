@@ -1,3 +1,7 @@
+//! Implementation crate for the [include_dir!()] macro.
+//! 
+//! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
+
 #[macro_use]
 extern crate proc_macro_hack;
 extern crate failure;
