@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["proc_macro_expr_decl","Declare a hacky procedural macro that expands to an expression."],["proc_macro_expr_impl","Implement a hacky procedural macro that expands to an expression."],["proc_macro_item_decl","Declare a hacky procedural macro that expands to items."],["proc_macro_item_impl","Implement a hacky procedural macro that expands to items."]]});
