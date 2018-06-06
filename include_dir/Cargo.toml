@@ -4,15 +4,10 @@ name = "include_dir"
 version = "0.2.0"
 description = "Embed the contents of a directory in your binary"
 license = "MIT"
-readme = "README.md"
+readme = "../README.md"
 keywords = ["assets", "include", "embed", "dir"]
 repository = "https://github.com/Michael-F-Bryan/include_dir"
 categories = ["development-tools", "web-programming", "game-engines"]
-
-
-[package.metadata.release]
-sign-commit = true
-tag-prefix = "v"
 
 [badges.appveyor]
 branch = "master"
@@ -22,7 +17,6 @@ service = "github"
 [badges.travis-ci]
 branch = "master"
 repository = "Michael-F-Bryan/include_dir"
-
 
 [dependencies]
 glob = "0.2.11"
