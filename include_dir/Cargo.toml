@@ -23,7 +23,8 @@ glob = "0.2.11"
 proc-macro-hack = "0.4"
 
 [dependencies.include_dir_impl]
-path = "../include_dir_impl"
+version = "0.2.0"
+#path = "../include_dir_impl"
 
 [features]
 default = []
