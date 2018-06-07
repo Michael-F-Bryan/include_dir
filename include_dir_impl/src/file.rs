@@ -35,7 +35,7 @@ impl ToTokens for File {
         let contents = &self.contents;
 
         let tok = quote!{
-            ::include_dir::File {
+            File {
                 path: #path,
                 contents: &[#(
                     #contents

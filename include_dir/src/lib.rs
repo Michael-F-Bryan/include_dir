@@ -50,8 +50,6 @@ extern crate glob;
 
 mod dir;
 mod file;
-#[cfg(feature = "example")]
-pub mod generated_example;
 mod globs;
 
 pub use dir::Dir;
@@ -60,9 +58,19 @@ pub use file::File;
 #[doc(hidden)]
 pub use include_dir_impl::*;
 
+#[macro_export]
+#[doc(hidden)]
+/// Hack used by `include_dir_impl` which can't access `$crate`.
+macro_rules! __include_dir_use_everything {
+    () => {
+        pub use $crate::*;
+    };
+}
+
 proc_macro_expr_decl! {
     include_dir! => include_dir_impl
 }
 
-// for use with `cargo expand >> src/generated_example.rs`
-//pub static INCLUDE_DIR_SRC: Dir = include_dir!(".");
+/// Example the output generated when running `include_dir!()` on itself.
+#[cfg(feature = "example-output")]
+pub static GENERATED_EXAMPLE: Dir = include_dir!(".");

@@ -23,12 +23,12 @@ glob = "0.2.11"
 proc-macro-hack = "0.4"
 
 [dependencies.include_dir_impl]
-version = "0.2.1"
-#path = "../include_dir_impl"
+#version = "0.2.1"
+path = "../include_dir_impl"
 
 [features]
 default = []
-example = []
+example-output = []
 
 [package.metadata.docs.rs]
 all-features = true

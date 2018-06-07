@@ -55,7 +55,7 @@ impl ToTokens for Dir {
         let dirs = &self.dirs;
 
         let tok = quote!{
-            ::include_dir::Dir {
+            Dir {
                 path: #path,
                 files: &[#(
                     #files

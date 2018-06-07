@@ -1,5 +1,5 @@
 //! Implementation crate for the [include_dir!()] macro.
-//! 
+//!
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
 #[macro_use]
@@ -37,6 +37,11 @@ proc_macro_expr_impl! {
         let mut dir = Dir::from_disk(&path).expect("Couldn't load the directory");
         dir.normalize(&path);
 
-        quote!(#dir).to_string()
+        let tokens = quote!({
+                __include_dir_use_everything!();
+                #dir
+            });
+
+        tokens.to_string()
     }
 }
