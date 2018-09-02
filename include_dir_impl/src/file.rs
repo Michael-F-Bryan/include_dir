@@ -1,45 +1,34 @@
-use failure::{Error, ResultExt};
+use failure::{Error};
 use proc_macro2::TokenStream;
 use quote::ToTokens;
-use std::fs;
-use std::io::Read;
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct File {
-    pub path: PathBuf,
-    pub contents: Vec<u8>,
+    pub root_rel_path: PathBuf,
+    pub abs_path: PathBuf,
 }
 
 impl File {
-    pub fn from_disk<P: Into<PathBuf>>(path: P) -> Result<File, Error> {
-        let path = path.into();
+    pub fn from_disk<Q: AsRef<Path>, P: Into<PathBuf>>(root: Q, path: P) -> Result<File, Error> {
+        let abs_path = path.into();
+        let root = root.as_ref();
 
-        let mut contents = Vec::new();
-        fs::File::open(&path)
-            .context("Unable to open the file")?
-            .read_to_end(&mut contents)
-            .context("Couldn't read the file")?;
+        let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
 
-        Ok(File { path, contents })
-    }
-
-    pub fn normalize(&mut self, root: &Path) {
-        self.path = self.path.strip_prefix(root).unwrap().to_path_buf();
+        Ok(File { abs_path, root_rel_path })
     }
 }
 
 impl ToTokens for File {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let path = self.path.display().to_string();
-        let contents = &self.contents;
+        let root_rel_path = self.root_rel_path.display().to_string();
+        let abs_path = self.abs_path.display().to_string();
 
         let tok = quote!{
             File {
-                path: #path,
-                contents: &[#(
-                    #contents
-                 ),*],
+                path: #root_rel_path,
+                contents: include_bytes!(#abs_path),
             }
         };
 

@@ -34,8 +34,7 @@ proc_macro_expr_impl! {
 
         let path = path.canonicalize().expect("Can't normalize the path");
 
-        let mut dir = Dir::from_disk(&path).expect("Couldn't load the directory");
-        dir.normalize(&path);
+        let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
 
         let tokens = quote!({
                 __include_dir_use_everything!();
