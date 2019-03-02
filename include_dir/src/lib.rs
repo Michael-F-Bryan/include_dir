@@ -31,13 +31,6 @@
 //! }
 //! # }
 //! ```
-//!
-//! # Features
-//!
-//! This library exposes a couple feature flags for enabling and disabling extra
-//! functionality. These are:
-//!
-//! - **example:** compile in an example of the embedded directory tree
 
 #![deny(missing_docs, missing_copy_implementations, missing_debug_implementations)]
 
@@ -58,7 +51,3 @@ pub use file::File;
 #[doc(hidden)]
 #[proc_macro_hack]
 pub use include_dir_impl::include_dir;
-
-/// Example the output generated when running `include_dir!()` on itself.
-#[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir = include_dir!(".");

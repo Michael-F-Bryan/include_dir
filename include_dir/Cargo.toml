@@ -27,7 +27,6 @@ path = "../include_dir_impl"
 
 [features]
 default = []
-example-output = []
 
 [package.metadata.docs.rs]
 all-features = true
