@@ -4,9 +4,9 @@ use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct File {
-    pub root_rel_path: PathBuf,
-    pub abs_path: PathBuf,
+pub(crate) struct File {
+    root_rel_path: PathBuf,
+    abs_path: PathBuf,
 }
 
 impl File {
