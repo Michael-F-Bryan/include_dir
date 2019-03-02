@@ -5,11 +5,11 @@ use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Dir {
-    pub root_rel_path: PathBuf,
-    pub abs_path: PathBuf,
-    pub files: Vec<File>,
-    pub dirs: Vec<Dir>,
+pub(crate) struct Dir {
+    root_rel_path: PathBuf,
+    abs_path: PathBuf,
+    files: Vec<File>,
+    dirs: Vec<Dir>,
 }
 
 impl Dir {
