@@ -1,8 +1,9 @@
 use failure::{self, Error, ResultExt};
-use file::File;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
+
+use crate::file::File;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Dir {

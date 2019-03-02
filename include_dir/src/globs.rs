@@ -1,7 +1,8 @@
-use dir::Dir;
-use file::File;
 use glob::Pattern;
 use std::path::Path;
+
+use crate::dir::Dir;
+use crate::file::File;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Globs<'a> {

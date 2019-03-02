@@ -1,7 +1,8 @@
-use file::File;
 use glob::{Pattern, PatternError};
-use globs::{DirEntry, Globs};
 use std::path::Path;
+
+use crate::file::File;
+use crate::globs::{DirEntry, Globs};
 
 /// A directory entry.
 #[derive(Debug, Copy, Clone, PartialEq)]

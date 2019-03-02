@@ -34,19 +34,14 @@
 
 #![deny(missing_docs, missing_copy_implementations, missing_debug_implementations)]
 
-#[allow(unused_imports)]
-#[macro_use]
-extern crate include_dir_impl;
-#[macro_use]
-extern crate proc_macro_hack;
-extern crate glob;
+use proc_macro_hack::proc_macro_hack;
 
 mod dir;
 mod file;
 mod globs;
 
-pub use dir::Dir;
-pub use file::File;
+pub use crate::dir::Dir;
+pub use crate::file::File;
 
 #[doc(hidden)]
 #[proc_macro_hack]

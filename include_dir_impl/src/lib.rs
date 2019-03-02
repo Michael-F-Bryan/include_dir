@@ -3,18 +3,12 @@
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
 extern crate proc_macro;
-extern crate proc_macro_hack;
-extern crate failure;
-extern crate proc_macro2;
-extern crate syn;
-extern crate quote;
 
 use proc_macro::TokenStream;
 use proc_macro_hack::proc_macro_hack;
 use quote::quote;
 use syn::{parse_macro_input, LitStr};
 
-use dir::Dir;
 use std::env;
 use std::path::PathBuf;
 
@@ -34,7 +28,7 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
 
     let path = path.canonicalize().expect("Can't normalize the path");
 
-    let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
+    let dir = dir::Dir::from_disk(&path, &path).expect("Couldn't load the directory");
 
     TokenStream::from(quote! {
         #dir

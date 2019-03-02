@@ -1,7 +1,4 @@
-#[macro_use]
-extern crate include_dir;
-
-use include_dir::Dir;
+use include_dir::{Dir, include_dir};
 
 /// Example the output generated when running `include_dir!()` on itself.
 pub static GENERATED_EXAMPLE: Dir = include_dir!("src");
