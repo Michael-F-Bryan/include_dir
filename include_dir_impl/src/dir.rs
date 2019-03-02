@@ -1,7 +1,7 @@
 use failure::{self, Error, ResultExt};
 use file::File;
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -47,7 +47,7 @@ impl ToTokens for Dir {
         let dirs = &self.dirs;
 
         let tok = quote!{
-            Dir {
+            $crate::Dir {
                 path: #root_rel_path,
                 files: &[#(
                     #files

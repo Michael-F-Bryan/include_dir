@@ -2,45 +2,41 @@
 //!
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
-#[macro_use]
+extern crate proc_macro;
 extern crate proc_macro_hack;
 extern crate failure;
 extern crate proc_macro2;
 extern crate syn;
-#[macro_use]
 extern crate quote;
 
-mod dir;
-mod file;
+use proc_macro::TokenStream;
+use proc_macro_hack::proc_macro_hack;
+use quote::quote;
+use syn::{parse_macro_input, LitStr};
 
 use dir::Dir;
 use std::env;
 use std::path::PathBuf;
-use syn::LitStr;
 
-proc_macro_expr_impl! {
-    /// Add one to an expression.
-    pub fn include_dir_impl(input: &str) -> String {
-        let input: LitStr =  syn::parse_str(input)
-            .expect("include_dir!() only accepts a single string argument");
-        let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap();
+mod dir;
+mod file;
 
-        let path = PathBuf::from(crate_root)
-            .join(input.value());
+#[proc_macro_hack]
+pub fn include_dir(input: TokenStream) -> TokenStream {
+    let input: LitStr = parse_macro_input!(input as LitStr);
+    let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap();
 
-        if !path.exists() {
-            panic!("\"{}\" doesn't exist", path.display());
-        }
+    let path = PathBuf::from(crate_root).join(input.value());
 
-        let path = path.canonicalize().expect("Can't normalize the path");
-
-        let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
-
-        let tokens = quote!({
-                __include_dir_use_everything!();
-                #dir
-            });
-
-        tokens.to_string()
+    if !path.exists() {
+        panic!("\"{}\" doesn't exist", path.display());
     }
+
+    let path = path.canonicalize().expect("Can't normalize the path");
+
+    let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
+
+    TokenStream::from(quote! {
+        #dir
+    })
 }

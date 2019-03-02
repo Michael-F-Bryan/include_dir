@@ -20,10 +20,9 @@ repository = "Michael-F-Bryan/include_dir"
 
 [dependencies]
 glob = "0.2.11"
-proc-macro-hack = "0.4"
+proc-macro-hack = "0.5"
 
 [dependencies.include_dir_impl]
-#version = "0.2.1"
 path = "../include_dir_impl"
 
 [features]
