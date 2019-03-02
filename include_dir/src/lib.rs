@@ -1,5 +1,5 @@
-//! An extension to the `include_str!()` macro for embedding an entire directory
-//! tree into your binary.
+//! An extension to the `include_str!()` and `include_bytes!()` macro for embedding an entire
+//! directory tree into your binary.
 //!
 //! # Examples
 //!
