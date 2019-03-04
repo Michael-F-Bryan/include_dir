@@ -42,7 +42,8 @@ impl Dir {
 
 impl ToTokens for Dir {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let root_rel_path = self.root_rel_path.display().to_string();
+        let root_rel_path = self.root_rel_path.to_str()
+            .expect("path should contain valid UTF-8 characters");
         let files = &self.files;
         let dirs = &self.dirs;
 
