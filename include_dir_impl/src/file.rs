@@ -1,4 +1,3 @@
-use failure::{Error};
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
@@ -10,13 +9,13 @@ pub(crate) struct File {
 }
 
 impl File {
-    pub fn from_disk<Q: AsRef<Path>, P: Into<PathBuf>>(root: Q, path: P) -> Result<File, Error> {
+    pub fn from_disk<Q: AsRef<Path>, P: Into<PathBuf>>(root: Q, path: P) -> File {
         let abs_path = path.into();
         let root = root.as_ref();
 
         let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
 
-        Ok(File { abs_path, root_rel_path })
+        File { abs_path, root_rel_path }
     }
 }
 

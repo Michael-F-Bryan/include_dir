@@ -30,7 +30,7 @@ impl Dir {
             let entry = entry?.path();
 
             if entry.is_file() {
-                files.push(File::from_disk(&root, entry)?);
+                files.push(File::from_disk(&root, entry));
             } else if entry.is_dir() {
                 dirs.push(Dir::from_disk(&root, entry)?);
             }
