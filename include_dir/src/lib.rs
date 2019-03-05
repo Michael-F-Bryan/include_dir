@@ -11,10 +11,10 @@
 //! #[macro_use]
 //! extern crate include_dir;
 //!
-//! use include_dir::Dir;
+//! use include_dir::FileSystem;
 //! use std::path::Path;
 //!
-//! const PROJECT_DIR: Dir = include_dir!(".");
+//! const PROJECT_DIR: FileSystem = include_dir!(".");
 //!
 //! # fn main() {
 //! // of course, you can retrieve a file by its full path
@@ -41,8 +41,6 @@
 
 #![deny(missing_docs, missing_copy_implementations, missing_debug_implementations)]
 
-#[allow(unused_imports)]
-#[macro_use]
 extern crate include_dir_impl;
 #[macro_use]
 extern crate proc_macro_hack;
@@ -50,10 +48,12 @@ extern crate glob;
 
 mod dir;
 mod file;
+mod fs;
 mod globs;
 
-pub use dir::Dir;
-pub use file::File;
+pub use crate::dir::{Dir, DirEntry};
+pub use crate::file::File;
+pub use crate::fs::FileSystem;
 
 #[doc(hidden)]
 #[proc_macro_hack]

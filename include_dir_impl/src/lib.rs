@@ -37,6 +37,8 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
     let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
 
     TokenStream::from(quote! {
-        #dir
+        $crate::FileSystem {
+            root: $crate::DirEntry::Dir(#dir),
+        }
     })
 }

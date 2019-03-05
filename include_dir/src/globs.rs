@@ -1,7 +1,6 @@
-use dir::Dir;
-use file::File;
 use glob::Pattern;
-use std::path::Path;
+
+use crate::dir::DirEntry;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Globs<'a> {
@@ -10,14 +9,20 @@ pub struct Globs<'a> {
 }
 
 impl<'a> Globs<'a> {
-    pub(crate) fn new(pattern: Pattern, root: Dir<'a>) -> Globs<'a> {
-        let stack = vec![DirEntry::Dir(root)];
-        Globs { stack, pattern }
+    pub(crate) fn new(pattern: Pattern, item: DirEntry<'a>) -> Globs<'a> {
+        let mut globs = Globs {
+            stack: vec![],
+            pattern,
+        };
+
+        globs.fill_buffer(item);
+
+        globs
     }
 
-    fn fill_buffer(&mut self, item: &DirEntry<'a>) {
-        if let DirEntry::Dir(ref dir) = *item {
-            self.stack.extend(dir.dir_entries());
+    fn fill_buffer(&mut self, item: DirEntry<'a>) {
+        if let DirEntry::Dir(dir) = item {
+            self.stack.extend(dir.entries());
         }
     }
 }
@@ -27,7 +32,7 @@ impl<'a> Iterator for Globs<'a> {
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(item) = self.stack.pop() {
-            self.fill_buffer(&item);
+            self.fill_buffer(item);
 
             if self.pattern.matches_path(item.path()) {
                 return Some(item);
@@ -35,20 +40,5 @@ impl<'a> Iterator for Globs<'a> {
         }
 
         None
-    }
-}
-
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum DirEntry<'a> {
-    File(File<'a>),
-    Dir(Dir<'a>),
-}
-
-impl<'a> DirEntry<'a> {
-    pub fn path(&self) -> &'a Path {
-        match *self {
-            DirEntry::File(f) => f.path(),
-            DirEntry::Dir(d) => d.path(),
-        }
     }
 }

@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct File {
@@ -17,6 +18,10 @@ impl File {
 
         File { abs_path, root_rel_path }
     }
+
+    pub fn file_name(&self) -> Option<&OsStr> {
+        self.root_rel_path.file_name()
+    }
 }
 
 impl ToTokens for File {
@@ -25,10 +30,15 @@ impl ToTokens for File {
             .expect("path should contain valid UTF-8 characters");
         let abs_path = self.abs_path.to_str()
             .expect("path should contain valid UTF-8 characters");
+        let file_name = self.root_rel_path.file_name()
+            .expect("path should contain a file name")
+            .to_str()
+            .expect("path should only contain valid UTF-8 characters");
 
         let tok = quote!{
             $crate::File {
                 path: #root_rel_path,
+                file_name: #file_name,
                 contents: include_bytes!(#abs_path),
             }
         };
