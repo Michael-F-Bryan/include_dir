@@ -1,15 +1,15 @@
 use failure::{self, Error, ResultExt};
 use file::File;
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Dir {
-    pub root_rel_path: PathBuf,
-    pub abs_path: PathBuf,
-    pub files: Vec<File>,
-    pub dirs: Vec<Dir>,
+pub(crate) struct Dir {
+    root_rel_path: PathBuf,
+    abs_path: PathBuf,
+    files: Vec<File>,
+    dirs: Vec<Dir>,
 }
 
 impl Dir {
@@ -47,7 +47,7 @@ impl ToTokens for Dir {
         let dirs = &self.dirs;
 
         let tok = quote!{
-            Dir {
+            $crate::Dir {
                 path: #root_rel_path,
                 files: &[#(
                     #files

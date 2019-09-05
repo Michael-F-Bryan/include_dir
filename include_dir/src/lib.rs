@@ -1,5 +1,5 @@
-//! An extension to the `include_str!()` macro for embedding an entire directory
-//! tree into your binary.
+//! An extension to the `include_str!()` and `include_bytes!()` macro for embedding an entire
+//! directory tree into your binary.
 //!
 //! # Examples
 //!
@@ -56,20 +56,8 @@ pub use dir::Dir;
 pub use file::File;
 
 #[doc(hidden)]
-pub use include_dir_impl::*;
-
-#[macro_export]
-#[doc(hidden)]
-/// Hack used by `include_dir_impl` which can't access `$crate`.
-macro_rules! __include_dir_use_everything {
-    () => {
-        pub use $crate::*;
-    };
-}
-
-proc_macro_expr_decl! {
-    include_dir! => include_dir_impl
-}
+#[proc_macro_hack]
+pub use include_dir_impl::include_dir;
 
 /// Example the output generated when running `include_dir!()` on itself.
 #[cfg(feature = "example-output")]
