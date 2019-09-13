@@ -1,15 +1,50 @@
 use failure::{self, Error, ResultExt};
-use file::File;
 use proc_macro2::TokenStream;
 use quote::{ToTokens, quote};
 use std::path::{Path, PathBuf};
+use std::ffi::OsStr;
+
+use crate::file::File;
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct Dir {
-    root_rel_path: PathBuf,
     abs_path: PathBuf,
-    files: Vec<File>,
-    dirs: Vec<Dir>,
+    root_rel_path: PathBuf,
+    entries: Vec<DirEntry>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum DirEntry {
+    File(File),
+    Dir(Dir),
+}
+
+impl DirEntry {
+    fn file_name(&self) -> Option<&OsStr> {
+        match self {
+            DirEntry::File(file) => file.file_name(),
+            DirEntry::Dir(dir) => dir.file_name(),
+        }
+    }
+}
+
+impl ToTokens for DirEntry {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let tok = match self {
+            DirEntry::File(file) => {
+                quote!{
+                    $crate::DirEntry::File(#file)
+                }
+            }
+            DirEntry::Dir(dir) => {
+                quote!{
+                    $crate::DirEntry::Dir(#dir)
+                }
+            }
+        };
+
+        tok.to_tokens(tokens);
+    }
 }
 
 impl Dir {
@@ -23,38 +58,48 @@ impl Dir {
             return Err(failure::err_msg("The directory doesn't exist"));
         }
 
-        let mut files = Vec::new();
-        let mut dirs = Vec::new();
+        let mut entries = Vec::new();
 
         for entry in abs_path.read_dir().context("Couldn't read the directory")? {
             let entry = entry?.path();
 
             if entry.is_file() {
-                files.push(File::from_disk(&root, entry)?);
+                entries.push(DirEntry::File(File::from_disk(&root, entry)));
             } else if entry.is_dir() {
-                dirs.push(Dir::from_disk(&root, entry)?);
+                entries.push(DirEntry::Dir(Dir::from_disk(&root, entry)?));
             }
         }
 
-        Ok(Dir { root_rel_path, abs_path, files, dirs })
+        entries.sort_unstable_by(|a, b| a.file_name().cmp(&b.file_name()));
+
+        Ok(Dir { abs_path, root_rel_path, entries })
+    }
+
+    pub fn file_name(&self) -> Option<&OsStr> {
+        self.root_rel_path.file_name()
     }
 }
 
 impl ToTokens for Dir {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let root_rel_path = self.root_rel_path.display().to_string();
-        let files = &self.files;
-        let dirs = &self.dirs;
+        let root_rel_path = self.root_rel_path.to_str()
+            .expect("path should contain valid UTF-8 characters");
+
+        let file_name = if let Some(file_name) = self.root_rel_path.file_name() {
+            file_name.to_str()
+                .expect("path cannot contain invalid UTF-8 characters")
+        } else {
+            ""
+        };
+        let entries = &self.entries;
 
         let tok = quote!{
             $crate::Dir {
                 path: #root_rel_path,
-                files: &[#(
-                    #files
-                 ),*],
-                dirs: &[#(
-                    #dirs
-                 ),*],
+                file_name: #file_name,
+                entries: &[#(
+                    #entries
+                ),*],
             }
         };
 

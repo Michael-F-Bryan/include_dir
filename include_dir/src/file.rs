@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::fmt::{self, Debug, Formatter};
 use std::path::Path;
 use std::str;
@@ -8,6 +9,8 @@ pub struct File<'a> {
     #[doc(hidden)]
     pub path: &'a str,
     #[doc(hidden)]
+    pub file_name: &'a str,
+    #[doc(hidden)]
     pub contents: &'a [u8],
 }
 
@@ -16,6 +19,11 @@ impl<'a> File<'a> {
     /// `include_dir!()`.
     pub fn path(&self) -> &'a Path {
         Path::new(self.path)
+    }
+
+    /// The file's name.
+    pub fn file_name(&self) -> &'a OsStr {
+        OsStr::new(self.file_name)
     }
 
     /// The file's raw contents.
@@ -33,6 +41,7 @@ impl<'a> Debug for File<'a> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         f.debug_struct("File")
             .field("path", &self.path)
+            .field("file_name", &self.file_name)
             .field("contents", &format!("<{} bytes>", self.contents.len()))
             .finish()
     }
