@@ -18,10 +18,10 @@ repository = "Michael-F-Bryan/include_dir"
 
 [dependencies]
 proc-macro-hack = "0.5"
-syn = "0.15"
-quote = "0.6.3"
-failure = "0.1.1"
-proc-macro2 = "0.4.4"
+syn = "1"
+quote = "1"
+failure = "0.1"
+proc-macro2 = "1"
 
 [lib]
 proc-macro = true
