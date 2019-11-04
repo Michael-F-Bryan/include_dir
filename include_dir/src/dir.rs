@@ -1,6 +1,6 @@
-use file::File;
+use crate::file::File;
 use glob::{Pattern, PatternError};
-use globs::{DirEntry, Globs};
+use crate::globs::{DirEntry, Globs};
 use std::path::Path;
 
 /// A directory entry.

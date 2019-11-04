@@ -8,10 +8,7 @@
 //! the source code for the `include_dir` crate has been included inside itself.
 //!
 //! ```rust
-//! #[macro_use]
-//! extern crate include_dir;
-//!
-//! use include_dir::Dir;
+//! use include_dir::{include_dir, Dir};
 //! use std::path::Path;
 //!
 //! const PROJECT_DIR: Dir = include_dir!(".");

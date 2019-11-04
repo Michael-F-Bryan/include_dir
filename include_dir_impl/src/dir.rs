@@ -1,5 +1,5 @@
-use crate::file::File;
 use failure::{self, Error, ResultExt};
+use file::File;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::path::{Path, PathBuf};

@@ -1,5 +1,5 @@
-use dir::Dir;
-use file::File;
+use crate::dir::Dir;
+use crate::file::File;
 use glob::Pattern;
 use std::path::Path;
 
