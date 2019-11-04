@@ -1,6 +1,6 @@
-use failure::{Error};
+use failure::Error;
 use proc_macro2::TokenStream;
-use quote::{ToTokens, quote};
+use quote::{quote, ToTokens};
 use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
@@ -16,7 +16,10 @@ impl File {
 
         let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
 
-        Ok(File { abs_path, root_rel_path })
+        Ok(File {
+            abs_path,
+            root_rel_path,
+        })
     }
 }
 
@@ -25,7 +28,7 @@ impl ToTokens for File {
         let root_rel_path = self.root_rel_path.display().to_string();
         let abs_path = self.abs_path.display().to_string();
 
-        let tok = quote!{
+        let tok = quote! {
             $crate::File {
                 path: #root_rel_path,
                 contents: include_bytes!(#abs_path),

@@ -83,8 +83,8 @@ impl<'a> Dir<'a> {
     }
 
     pub(crate) fn dir_entries(&self) -> impl Iterator<Item = DirEntry<'a>> {
-        let files = self.files().into_iter().map(|f| DirEntry::File(*f));
-        let dirs = self.dirs().into_iter().map(|d| DirEntry::Dir(*d));
+        let files = self.files().iter().map(|f| DirEntry::File(*f));
+        let dirs = self.dirs().iter().map(|d| DirEntry::Dir(*d));
 
         files.chain(dirs)
     }

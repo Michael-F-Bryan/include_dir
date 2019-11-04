@@ -16,7 +16,6 @@
 //!
 //! const PROJECT_DIR: Dir = include_dir!(".");
 //!
-//! # fn main() {
 //! // of course, you can retrieve a file by its full path
 //! let lib_rs = PROJECT_DIR.get_file("src/lib.rs").unwrap();
 //!
@@ -29,7 +28,6 @@
 //! for entry in PROJECT_DIR.find(glob).unwrap() {
 //!     println!("Found {}", entry.path().display());
 //! }
-//! # }
 //! ```
 //!
 //! # Features
@@ -39,7 +37,11 @@
 //!
 //! - **example:** compile in an example of the embedded directory tree
 
-#![deny(missing_docs, missing_copy_implementations, missing_debug_implementations)]
+#![deny(
+    missing_docs,
+    missing_copy_implementations,
+    missing_debug_implementations
+)]
 
 #[allow(unused_imports)]
 #[macro_use]
