@@ -2,28 +2,18 @@
 //!
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
-extern crate failure;
-extern crate proc_macro;
-extern crate proc_macro2;
-extern crate proc_macro_hack;
-extern crate quote;
-extern crate syn;
-
-use proc_macro::TokenStream;
-use proc_macro_hack::proc_macro_hack;
+use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, LitStr};
+use syn::LitStr;
 
-use dir::Dir;
+use crate::dir::Dir;
 use std::env;
 use std::path::PathBuf;
 
 mod dir;
 mod file;
 
-#[proc_macro_hack]
-pub fn include_dir(input: TokenStream) -> TokenStream {
-    let input: LitStr = parse_macro_input!(input as LitStr);
+pub fn include_dir(input: LitStr) -> TokenStream {
     let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap();
 
     let path = PathBuf::from(crate_root).join(input.value());

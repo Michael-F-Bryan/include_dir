@@ -6,6 +6,7 @@ description = "Implementation crate for include_dir"
 license = "MIT"
 readme = "../README.md"
 repository = "https://github.com/Michael-F-Bryan/include_dir"
+edition = "2018"
 
 [badges.appveyor]
 branch = "master"
@@ -17,11 +18,7 @@ branch = "master"
 repository = "Michael-F-Bryan/include_dir"
 
 [dependencies]
-proc-macro-hack = "0.5"
 syn = "1"
 quote = "1"
 failure = "0.1"
 proc-macro2 = "1"
-
-[lib]
-proc-macro = true
