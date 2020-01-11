@@ -14,7 +14,7 @@ use proc_macro_hack::proc_macro_hack;
 use quote::quote;
 use syn::{parse_macro_input, LitStr};
 
-use dir::Dir;
+use crate::dir::Dir;
 use std::env;
 use std::path::PathBuf;
 

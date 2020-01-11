@@ -51,8 +51,8 @@ mod dir;
 mod file;
 mod globs;
 
-pub use dir::Dir;
-pub use file::File;
+pub use crate::dir::Dir;
+pub use crate::file::File;
 
 #[doc(hidden)]
 #[proc_macro_hack]
