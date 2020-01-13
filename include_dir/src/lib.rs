@@ -53,6 +53,7 @@ mod globs;
 
 pub use crate::dir::Dir;
 pub use crate::file::File;
+pub use crate::globs::DirEntry;
 
 #[doc(hidden)]
 #[proc_macro_hack]

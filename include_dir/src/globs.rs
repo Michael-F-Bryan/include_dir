@@ -38,13 +38,17 @@ impl<'a> Iterator for Globs<'a> {
     }
 }
 
+/// Entries returned by the Globs iterator
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub enum DirEntry<'a> {
+    /// A file with its contents stored in a &'static [u8].
     File(File<'a>),
+    /// A directory entry.
     Dir(Dir<'a>),
 }
 
 impl<'a> DirEntry<'a> {
+    /// Get the entries's path
     pub fn path(&self) -> &'a Path {
         match *self {
             DirEntry::File(f) => f.path(),
