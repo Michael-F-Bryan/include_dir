@@ -40,9 +40,12 @@ let body = lib_rs.contents_utf8().unwrap();
 assert!(body.contains("SOME_INTERESTING_STRING"));
 
 // you can search for files (and directories) using glob patterns
-let glob = "**/*.rs";
-for entry in PROJECT_DIR.find(glob).unwrap() {
-    println!("Found {}", entry.path().display());
+#[cfg(feature = "search")]
+{
+    let glob = "**/*.rs";
+    for entry in PROJECT_DIR.find(glob).unwrap() {
+        println!("Found {}", entry.path().display());
+    }
 }
 ```
 

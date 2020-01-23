@@ -1,6 +1,4 @@
 use crate::file::File;
-use crate::globs::{DirEntry, Globs};
-use glob::{Pattern, PatternError};
 use std::path::Path;
 
 /// A directory entry.
@@ -73,19 +71,5 @@ impl<'a> Dir<'a> {
         }
 
         None
-    }
-
-    /// Search for a file or directory with a glob pattern.
-    pub fn find(&self, glob: &str) -> Result<impl Iterator<Item = DirEntry<'a>>, PatternError> {
-        let pattern = Pattern::new(glob)?;
-
-        Ok(Globs::new(pattern, *self))
-    }
-
-    pub(crate) fn dir_entries(&self) -> impl Iterator<Item = DirEntry<'a>> {
-        let files = self.files().iter().map(|f| DirEntry::File(*f));
-        let dirs = self.dirs().iter().map(|d| DirEntry::Dir(*d));
-
-        files.chain(dirs)
     }
 }

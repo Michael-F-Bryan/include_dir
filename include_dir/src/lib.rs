@@ -20,10 +20,13 @@
 //! let body = lib_rs.contents_utf8().unwrap();
 //! assert!(body.contains("SOME_INTERESTING_STRING"));
 //!
-//! // you can search for files (and directories) using glob patterns
-//! let glob = "**/*.rs";
-//! for entry in PROJECT_DIR.find(glob).unwrap() {
-//!     println!("Found {}", entry.path().display());
+//! // if you enable the `search` feature, you can for files (and directories) using glob patterns
+//! #[cfg(feature = "search")]
+//! {
+//!     let glob = "**/*.rs";
+//!     for entry in PROJECT_DIR.find(glob).unwrap() {
+//!         println!("Found {}", entry.path().display());
+//!     }
 //! }
 //! ```
 //!
@@ -51,10 +54,13 @@ extern crate proc_macro_hack;
 
 mod dir;
 mod file;
+
+#[cfg(feature = "search")]
 mod globs;
 
 pub use crate::dir::Dir;
 pub use crate::file::File;
+#[cfg(feature = "search")]
 pub use crate::globs::DirEntry;
 
 #[doc(hidden)]
