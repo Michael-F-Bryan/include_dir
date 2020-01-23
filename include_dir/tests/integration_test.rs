@@ -4,7 +4,7 @@ extern crate include_dir;
 use include_dir::Dir;
 use std::path::Path;
 
-const PARENT_DIR: Dir = include_dir!(".");
+const PARENT_DIR: Dir<'_> = include_dir!(".");
 
 #[test]
 fn included_all_files() {
@@ -14,7 +14,7 @@ fn included_all_files() {
     validate_directory(PARENT_DIR, root, root);
 }
 
-fn validate_directory(dir: Dir, path: &Path, root: &Path) {
+fn validate_directory(dir: Dir<'_>, path: &Path, root: &Path) {
     for entry in path.read_dir().unwrap() {
         let entry = entry.unwrap().path();
         let entry = entry.strip_prefix(root).unwrap();

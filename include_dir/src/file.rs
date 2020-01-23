@@ -30,7 +30,7 @@ impl<'a> File<'a> {
 }
 
 impl<'a> Debug for File<'a> {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("File")
             .field("path", &self.path)
             .field("contents", &format!("<{} bytes>", self.contents.len()))
