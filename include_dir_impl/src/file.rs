@@ -1,4 +1,4 @@
-use failure::Error;
+use anyhow::Error;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::path::{Path, PathBuf};

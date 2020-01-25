@@ -2,7 +2,6 @@
 //!
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
-extern crate failure;
 extern crate proc_macro;
 extern crate proc_macro2;
 extern crate proc_macro_hack;

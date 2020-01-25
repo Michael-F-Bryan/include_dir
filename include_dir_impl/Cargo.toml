@@ -21,7 +21,7 @@ repository = "Michael-F-Bryan/include_dir"
 proc-macro-hack = "0.5"
 syn = "1"
 quote = "1"
-failure = "0.1"
+anyhow = "1.0"
 proc-macro2 = "1"
 
 [lib]
