@@ -1,5 +1,5 @@
 use crate::file::File;
-use failure::{self, Error, ResultExt};
+use anyhow::{self, format_err, Context, Error};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::path::{Path, PathBuf};
@@ -20,7 +20,7 @@ impl Dir {
         let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
 
         if !abs_path.exists() {
-            return Err(failure::err_msg("The directory doesn't exist"));
+            return Err(format_err!("The directory doesn't exist"));
         }
 
         let mut files = Vec::new();
