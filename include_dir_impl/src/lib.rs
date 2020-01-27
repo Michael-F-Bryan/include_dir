@@ -3,10 +3,6 @@
 //! [include_dir!()]: https://github.com/Michael-F-Bryan/include_dir
 
 extern crate proc_macro;
-extern crate proc_macro2;
-extern crate proc_macro_hack;
-extern crate quote;
-extern crate syn;
 
 use proc_macro::TokenStream;
 use proc_macro_hack::proc_macro_hack;

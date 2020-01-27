@@ -35,9 +35,12 @@
 //! - **example:** compile in an example of the embedded directory tree
 
 #![deny(
-    missing_docs,
+    elided_lifetimes_in_paths,
+    future_incompatible,
     missing_copy_implementations,
-    missing_debug_implementations
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms,
 )]
 
 #[allow(unused_imports)]
@@ -45,7 +48,6 @@
 extern crate include_dir_impl;
 #[macro_use]
 extern crate proc_macro_hack;
-extern crate glob;
 
 mod dir;
 mod file;
