@@ -7,5 +7,5 @@ rust:
 cache: cargo
 
 script:
-  - cargo build --workspace --all-features --verbose
-  - cargo test --workspace --all-features --verbose
+  - cargo build --all --all-features --verbose
+  - cargo test --all --all-features --verbose
