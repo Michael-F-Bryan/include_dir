@@ -1,45 +1,36 @@
-use crate::dir::Dir;
-use crate::file::File;
+use crate::direntry::DirEntry;
 use glob::{Pattern, PatternError};
-use std::path::Path;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Globs<'a> {
-    stack: Vec<DirEntry<'a>>,
+    stack: Vec<&'a DirEntry<'a>>,
     pattern: Pattern,
 }
 
-impl<'a> Dir<'a> {
+impl DirEntry<'_> {
     /// Search for a file or directory with a glob pattern.
-    pub fn find(&self, glob: &str) -> Result<impl Iterator<Item = DirEntry<'a>>, PatternError> {
+    pub fn find(&self, glob: &str) -> Result<impl Iterator<Item = &'_ DirEntry<'_>>, PatternError> {
         let pattern = Pattern::new(glob)?;
 
-        Ok(Globs::new(pattern, *self))
-    }
-
-    pub(crate) fn dir_entries(&self) -> impl Iterator<Item = DirEntry<'a>> {
-        let files = self.files().iter().map(|f| DirEntry::File(*f));
-        let dirs = self.dirs().iter().map(|d| DirEntry::Dir(*d));
-
-        files.chain(dirs)
+        Ok(Globs::new(pattern, self))
     }
 }
 
 impl<'a> Globs<'a> {
-    pub(crate) fn new(pattern: Pattern, root: Dir<'a>) -> Globs<'a> {
-        let stack = vec![DirEntry::Dir(root)];
+    pub(crate) fn new(pattern: Pattern, root: &'a DirEntry<'a>) -> Globs<'a> {
+        let stack = vec![root];
         Globs { stack, pattern }
     }
 
-    fn fill_buffer(&mut self, item: &DirEntry<'a>) {
-        if let DirEntry::Dir(ref dir) = *item {
-            self.stack.extend(dir.dir_entries());
+    fn fill_buffer(&mut self, item: &'a DirEntry<'a>) {
+        if let DirEntry::Dir(dir) = item {
+            self.stack.extend(dir.entries());
         }
     }
 }
 
 impl<'a> Iterator for Globs<'a> {
-    type Item = DirEntry<'a>;
+    type Item = &'a DirEntry<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
         while let Some(item) = self.stack.pop() {
@@ -49,26 +40,6 @@ impl<'a> Iterator for Globs<'a> {
                 return Some(item);
             }
         }
-
         None
-    }
-}
-
-/// Entries returned by the Globs iterator
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub enum DirEntry<'a> {
-    /// A file with its contents stored in a &'static [u8].
-    File(File<'a>),
-    /// A directory entry.
-    Dir(Dir<'a>),
-}
-
-impl<'a> DirEntry<'a> {
-    /// Get the entries's path
-    pub fn path(&self) -> &'a Path {
-        match *self {
-            DirEntry::File(f) => f.path(),
-            DirEntry::Dir(d) => d.path(),
-        }
     }
 }

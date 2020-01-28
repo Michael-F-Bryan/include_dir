@@ -5,12 +5,12 @@ use std::path::{Path, PathBuf};
 
 #[derive(Debug, Clone, PartialEq)]
 pub(crate) struct File {
-    root_rel_path: PathBuf,
+    pub(crate) root_rel_path: PathBuf,
     abs_path: PathBuf,
 }
 
 impl File {
-    pub fn from_disk<Q: AsRef<Path>, P: Into<PathBuf>>(root: Q, path: P) -> Result<File, Error> {
+    pub fn from_disk(root: impl AsRef<Path>, path: impl Into<PathBuf>) -> Result<File, Error> {
         let abs_path = path.into();
         let root = root.as_ref();
 
@@ -25,11 +25,27 @@ impl File {
 
 impl ToTokens for File {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let root_rel_path = self.root_rel_path.display().to_string();
+        let root_rel_path = self.root_rel_path
+            .to_str()
+            .unwrap_or_else(|| panic!(
+                "Path {} cannot be included as it is not UTF-8",
+                self.root_rel_path.display(),
+            ));
+
         let abs_path = self.abs_path.display().to_string();
+
+        let file_name = self.root_rel_path
+            .file_name()
+            .unwrap()
+            .to_str()
+            .unwrap_or_else(|| panic!(
+                "Path {} can not be included as it is not UTF-8",
+                self.root_rel_path.display()
+            ));
 
         let tok = quote! {
             $crate::File {
+                file_name: #file_name,
                 path: #root_rel_path,
                 contents: include_bytes!(#abs_path),
             }
