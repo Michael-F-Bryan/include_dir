@@ -69,4 +69,4 @@ pub use include_dir_impl::include_dir;
 
 /// Example the output generated when running `include_dir!()` on itself.
 #[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir = include_dir!(".");
+pub static GENERATED_EXAMPLE: Dir<'_> = include_dir!(".");
