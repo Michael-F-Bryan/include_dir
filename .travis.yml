@@ -1,11 +1,11 @@
 language: rust
 rust:
   - stable
-  - 1.34.0
+  - 1.40.0
   - nightly
 
 cache: cargo
 
 script:
-  - cargo build --all --verbose
-  - cargo test --all --verbose
+  - cargo build --workspace --all-features --verbose
+  - cargo test --workspace --all-features --verbose

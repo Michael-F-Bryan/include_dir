@@ -20,10 +20,13 @@
 //! let body = lib_rs.contents_utf8().unwrap();
 //! assert!(body.contains("SOME_INTERESTING_STRING"));
 //!
-//! // you can search for files (and directories) using glob patterns
-//! let glob = "**/*.rs";
-//! for entry in PROJECT_DIR.find(glob).unwrap() {
-//!     println!("Found {}", entry.path().display());
+//! // if you enable the `search` feature, you can for files (and directories) using glob patterns
+//! #[cfg(feature = "search")]
+//! {
+//!     let glob = "**/*.rs";
+//!     for entry in PROJECT_DIR.find(glob).unwrap() {
+//!         println!("Found {}", entry.path().display());
+//!     }
 //! }
 //! ```
 //!
@@ -51,10 +54,13 @@ extern crate proc_macro_hack;
 
 mod dir;
 mod file;
+
+#[cfg(feature = "search")]
 mod globs;
 
 pub use crate::dir::Dir;
 pub use crate::file::File;
+#[cfg(feature = "search")]
 pub use crate::globs::DirEntry;
 
 #[doc(hidden)]
@@ -63,4 +69,4 @@ pub use include_dir_impl::include_dir;
 
 /// Example the output generated when running `include_dir!()` on itself.
 #[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir = include_dir!(".");
+pub static GENERATED_EXAMPLE: Dir<'_> = include_dir!(".");
