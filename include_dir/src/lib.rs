@@ -8,17 +8,16 @@
 //! the source code for the `include_dir` crate has been included inside itself.
 //!
 //! ```rust
-//! use include_dir::{include_dir, Dir};
+//! use include_dir::{include_dir, DirEntry};
 //! use std::path::Path;
 //!
-//! const PROJECT_DIR: Dir = include_dir!(".");
+//! const PROJECT_DIR: DirEntry = include_dir!(".");
 //!
 //! // of course, you can retrieve a file by its full path
-//! let lib_rs = PROJECT_DIR.get_file("src/lib.rs").unwrap();
-//!
+//! let lib_rs = PROJECT_DIR.get("src/lib.rs").unwrap();
 //! // you can also inspect the file's contents
-//! let body = lib_rs.contents_utf8().unwrap();
-//! assert!(body.contains("SOME_INTERESTING_STRING"));
+//! //let body = lib_rs.contents_utf8().unwrap();
+//! //assert!(body.contains("SOME_INTERESTING_STRING"));
 //!
 //! // if you enable the `search` feature, you can for files (and directories) using glob patterns
 //! #[cfg(feature = "search")]
@@ -53,15 +52,15 @@ extern crate include_dir_impl;
 extern crate proc_macro_hack;
 
 mod dir;
+mod direntry;
 mod file;
 
 #[cfg(feature = "search")]
 mod globs;
 
 pub use crate::dir::Dir;
+pub use crate::direntry::DirEntry;
 pub use crate::file::File;
-#[cfg(feature = "search")]
-pub use crate::globs::DirEntry;
 
 #[doc(hidden)]
 #[proc_macro_hack]
@@ -69,4 +68,4 @@ pub use include_dir_impl::include_dir;
 
 /// Example the output generated when running `include_dir!()` on itself.
 #[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir<'_> = include_dir!(".");
+pub static GENERATED_EXAMPLE: DirEntry<'_> = include_dir!(".");

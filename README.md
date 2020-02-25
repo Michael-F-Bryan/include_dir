@@ -59,3 +59,8 @@ To-Do list:
 
 - File metadata
 - Compression?
+
+## Limitations
+
+- Currently `include_dir!()` does not support files/directories that cannot be represented as UTF-8.
+  This is also a limitation of `include_bytes!()` and `include_str!()`

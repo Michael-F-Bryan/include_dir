@@ -4,17 +4,19 @@
 
 extern crate proc_macro;
 
+use std::env;
+use std::path::PathBuf;
+
 use proc_macro::TokenStream;
 use proc_macro_hack::proc_macro_hack;
 use quote::quote;
 use syn::{parse_macro_input, LitStr};
 
-use crate::dir::Dir;
-use std::env;
-use std::path::PathBuf;
-
 mod dir;
 mod file;
+mod direntry;
+
+use crate::direntry::DirEntry;
 
 #[proc_macro_hack]
 pub fn include_dir(input: TokenStream) -> TokenStream {
@@ -27,11 +29,14 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
         panic!("\"{}\" doesn't exist", path.display());
     }
 
-    let path = path.canonicalize().expect("Can't normalize the path");
+    let path = path
+        .canonicalize()
+        .unwrap_or_else(|_| panic!("Can't normalize the path"));
 
-    let dir = Dir::from_disk(&path, &path).expect("Couldn't load the directory");
+    let entry = DirEntry::from_disk(&path, &path)
+        .unwrap_or_else(|_| panic!("Could not load directory from {:?}", path));
 
     TokenStream::from(quote! {
-        #dir
+        #entry
     })
 }
