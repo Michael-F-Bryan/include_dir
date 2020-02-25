@@ -44,11 +44,7 @@ impl ToTokens for File {
             ));
 
         let tok = quote! {
-            $crate::File {
-                file_name: #file_name,
-                path: #root_rel_path,
-                contents: include_bytes!(#abs_path),
-            }
+            $crate::File::new(#root_rel_path, #file_name, include_bytes!(#abs_path))
         };
 
         tok.to_tokens(tokens);

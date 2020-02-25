@@ -43,10 +43,10 @@ impl DirEntry<'_> {
             },
             // If there are more components and we are in a directory, keep searching if able
             (Some(child), DirEntry::Dir(current_dir)) => {
-                current_dir.entries
+                current_dir.entries()
                     .binary_search_by_key(&child.into(), |entry| entry.file_name())
                     .ok()
-                    .map(|index| &current_dir.entries[index])
+                    .map(|index| &current_dir.entries()[index])
                     .and_then(|child_entry| child_entry.traverse(path_iter))
             }
             // otherwise we are a file then there is nowhere else to search, so we give up

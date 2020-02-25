@@ -83,13 +83,7 @@ impl ToTokens for Dir {
         let entries = &self.entries;
 
         let tok = quote! {
-            $crate::Dir {
-                path: #root_rel_path,
-                file_name: #file_name,
-                entries: &[#(
-                    #entries
-                 ),*],
-            }
+            $crate::Dir::new(#root_rel_path, #file_name, &[#(#entries),*])
         };
 
         tok.to_tokens(tokens);

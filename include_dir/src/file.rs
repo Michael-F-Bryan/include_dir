@@ -6,15 +6,20 @@ use std::ffi::OsStr;
 /// A file with its contents stored in a `&'static [u8]`.
 #[derive(Copy, Clone, PartialEq)]
 pub struct File<'a> {
-    #[doc(hidden)]
-    pub path: &'a str,
-    #[doc(hidden)]
-    pub file_name: &'a str,
-    #[doc(hidden)]
-    pub contents: &'a [u8],
+    path: &'a str,
+    file_name: &'a str,
+    contents: &'a [u8],
 }
 
-impl File<'_> {
+impl<'a> File<'a> {
+    /// FIXME: Docstring
+    pub const fn new(path: &'a str, file_name: &'a str, contents: &'a [u8]) -> Self {
+        Self {
+            path,
+            file_name,
+            contents,
+        }
+    }
     /// The file's raw contents.
     pub fn contents(&self) -> &'_ [u8] {
         self.contents

@@ -7,15 +7,22 @@ use crate::DirEntry;
 /// A directory entry.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dir<'a> {
-    #[doc(hidden)]
-    pub path: &'a str,
-    #[doc(hidden)]
-    pub file_name: Option<&'a str>,
-    #[doc(hidden)]
-    pub entries: &'a [DirEntry<'a>]
+    path: &'a str,
+    file_name: Option<&'a str>,
+    entries: &'a [DirEntry<'a>]
 }
 
-impl Dir<'_> {
+impl<'a> Dir<'a> {
+
+    /// FIXME: Docstring
+    pub const fn new(path: &'a str, file_name: Option<&'a str>, entries: &'a [DirEntry<'_>]) -> Self {
+        Self {
+            path,
+            file_name,
+            entries
+        }
+    }
+
     /// The file name of the directory
     ///
     /// This will be none if the directory corresponds to the root directory included with [include_dir!()]
