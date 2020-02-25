@@ -34,17 +34,8 @@ impl ToTokens for File {
 
         let abs_path = self.abs_path.display().to_string();
 
-        let file_name = self.root_rel_path
-            .file_name()
-            .unwrap()
-            .to_str()
-            .unwrap_or_else(|| panic!(
-                "Path {} can not be included as it is not UTF-8",
-                self.root_rel_path.display()
-            ));
-
         let tok = quote! {
-            $crate::File::new(#root_rel_path, #file_name, include_bytes!(#abs_path))
+            $crate::File::new(#root_rel_path, include_bytes!(#abs_path))
         };
 
         tok.to_tokens(tokens);

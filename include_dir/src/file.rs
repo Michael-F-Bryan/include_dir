@@ -1,22 +1,19 @@
 use std::fmt::{self, Debug, Formatter};
 use std::path::Path;
 use std::str;
-use std::ffi::OsStr;
 
 /// A file with its contents stored in a `&'static [u8]`.
 #[derive(Copy, Clone, PartialEq)]
 pub struct File<'a> {
     path: &'a str,
-    file_name: &'a str,
     contents: &'a [u8],
 }
 
 impl<'a> File<'a> {
-    /// FIXME: Docstring
-    pub const fn new(path: &'a str, file_name: &'a str, contents: &'a [u8]) -> Self {
+    /// Create a new [`File`]
+    pub const fn new(path: &'a str, contents: &'a [u8]) -> Self {
         Self {
             path,
-            file_name,
             contents,
         }
     }
@@ -33,11 +30,6 @@ impl<'a> File<'a> {
     /// Returns the File's path relative to the directory included with `include_dir!()`.
     pub fn path(&self) -> &'_ Path {
         Path::new(self.path)
-    }
-
-    /// Returns the final component of the [`Path`] of the file
-    pub fn file_name(&self) -> &'_ OsStr {
-        OsStr::new(self.file_name)
     }
 }
 

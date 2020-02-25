@@ -61,29 +61,10 @@ impl ToTokens for Dir {
         let root_rel_path = self.root_rel_path.to_str()
             .unwrap_or_else(|| panic!("Path {} is not valid UTF-8", self.root_rel_path.display()));
 
-        let file_name = {
-            let potential_file_name = self.root_rel_path
-                // n.b. - the root path *will not* have a file name per [PathBuf::file_name]
-                .file_name()
-                .map(|os_str| {
-                    os_str
-                        .to_str()
-                        .unwrap_or_else(|| panic!(
-                            "Path '{}' is not a valid UTF-8 and cannot be used.", self.root_rel_path.display()
-                        ))
-                });
-            // Seems we have to do this manually per https://github.com/dtolnay/quote/issues/129
-            if let Some(file_name) = potential_file_name {
-                quote!(::std::option::Option::Some(#file_name))
-            } else {
-                quote!(::std::option::Option::None)
-            }
-        };
-
         let entries = &self.entries;
 
         let tok = quote! {
-            $crate::Dir::new(#root_rel_path, #file_name, &[#(#entries),*])
+            $crate::Dir::new(#root_rel_path, &[#(#entries),*])
         };
 
         tok.to_tokens(tokens);

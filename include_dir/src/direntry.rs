@@ -1,4 +1,3 @@
-use std::ffi::OsStr;
 use std::path::Path;
 use std::path;
 
@@ -15,17 +14,6 @@ pub enum DirEntry<'a> {
 
 
 impl DirEntry<'_> {
-    /// Returns the bare file name of the entry without any leading Path components
-    ///
-    /// This will be [`None`] if the `DirEntry` corresponds to the path included
-    /// via [`include_dir!()`] (i.e. the root path)
-    pub fn file_name(&self) -> Option<&'_ OsStr> {
-        match self {
-            DirEntry::Dir(dir) => { dir.file_name()}
-            DirEntry::File(file) => { file.file_name().into()}
-        }
-    }
-
     /// The [`Path`] that corresponds to the entry
     pub fn path(&self) -> &'_ Path {
         match self {
@@ -44,7 +32,7 @@ impl DirEntry<'_> {
             // If there are more components and we are in a directory, keep searching if able
             (Some(child), DirEntry::Dir(current_dir)) => {
                 current_dir.entries()
-                    .binary_search_by_key(&child.into(), |entry| entry.file_name())
+                    .binary_search_by_key(&child.into(), |entry| entry.path().file_name())
                     .ok()
                     .map(|index| &current_dir.entries()[index])
                     .and_then(|child_entry| child_entry.traverse(path_iter))
