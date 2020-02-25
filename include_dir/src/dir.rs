@@ -2,6 +2,7 @@ use crate::file::File;
 use std::path::Path;
 
 use crate::DirEntry;
+use std::convert::TryInto;
 
 /// A directory entry.
 #[derive(Debug, Copy, Clone, PartialEq)]
@@ -21,12 +22,12 @@ impl<'a> Dir<'a> {
     }
 
     /// The directory's path relative to the directory included with [include_dir!()]
-    pub fn path(&self) -> &'_ Path {
+    pub fn path(&self) -> &Path {
         Path::new(self.path)
     }
 
     /// Retrieve the entries within the directory
-    pub fn entries(&self) -> &'_ [DirEntry<'_>] {
+    pub fn entries(&self) -> &[DirEntry<'_>] {
         self.entries
     }
 
@@ -35,7 +36,8 @@ impl<'a> Dir<'a> {
         self
             .entries
             .iter()
-            .filter_map(Into::into)
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
    }
 
     /// Return an iterator over all sub-directories within the directory
@@ -43,6 +45,7 @@ impl<'a> Dir<'a> {
         self
             .entries
             .iter()
-            .filter_map(Into::into)
+            .map(TryInto::try_into)
+            .filter_map(Result::ok)
     }
 }

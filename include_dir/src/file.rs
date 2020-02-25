@@ -18,17 +18,17 @@ impl<'a> File<'a> {
         }
     }
     /// The file's raw contents.
-    pub fn contents(&self) -> &'_ [u8] {
+    pub fn contents(&self) -> &[u8] {
         self.contents
     }
 
     /// The file's contents interpreted as a string.
-    pub fn contents_utf8(&self) -> Option<&'_ str> {
+    pub fn contents_utf8(&self) -> Option<&str> {
         str::from_utf8(self.contents()).ok()
     }
 
     /// Returns the File's path relative to the directory included with `include_dir!()`.
-    pub fn path(&self) -> &'_ Path {
+    pub fn path(&self) -> &Path {
         Path::new(self.path)
     }
 }

@@ -2,6 +2,7 @@ use std::path::Path;
 use std::path;
 
 use crate::{File, Dir};
+use std::convert::TryFrom;
 
 /// An entry within the embedded filesystem representation
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -82,42 +83,50 @@ impl DirEntry<'_> {
     }
 }
 
-impl<'a> From<DirEntry<'a>> for Option<Dir<'a>> {
-    fn from(entry: DirEntry<'a>) -> Self {
+impl<'a> TryFrom<DirEntry<'a>> for Dir<'a> {
+    type Error = ();
+
+    fn try_from(entry: DirEntry<'a>) -> Result<Self, Self::Error> {
         if let DirEntry::Dir(dir) = entry {
-            Some(dir)
+            Ok(dir)
         } else {
-            None
+            Err(())
         }
     }
 }
 
-impl<'a> From<&'a DirEntry<'a>> for Option<&Dir<'a>> {
-    fn from(entry: &'a DirEntry<'a>) -> Self {
+impl<'a> TryFrom<&'a DirEntry<'a>> for &Dir<'a> {
+    type Error = ();
+
+    fn try_from(entry: &'a DirEntry<'a>) -> Result<Self, Self::Error> {
         if let DirEntry::Dir(dir) = entry {
-            Some(dir)
+            Ok(dir)
         } else {
-            None
+            Err(())
         }
     }
 }
 
-impl<'a> From<&'a DirEntry<'a>> for Option<&File<'a>> {
-    fn from(entry: &'a DirEntry<'a>) -> Self {
+impl<'a> TryFrom<DirEntry<'a>> for File<'a> {
+    type Error = ();
+
+    fn try_from(entry: DirEntry<'a>) -> Result<Self, Self::Error> {
         if let DirEntry::File(file) = entry {
-            Some(file)
+            Ok(file)
         } else {
-            None
+            Err(())
         }
     }
 }
 
-impl<'a> From<DirEntry<'a>> for Option<File<'a>> {
-    fn from(entry: DirEntry<'a>) -> Self {
+impl<'a> TryFrom<&'a DirEntry<'a>> for &File<'a> {
+    type Error = ();
+
+    fn try_from(entry: &'a DirEntry<'a>) -> Result<Self, Self::Error> {
         if let DirEntry::File(file) = entry {
-            Some(file)
+            Ok(file)
         } else {
-            None
+            Err(())
         }
     }
 }
