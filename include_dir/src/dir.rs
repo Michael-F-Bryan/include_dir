@@ -37,7 +37,7 @@ impl<'a> Dir<'a> {
 
     /// Fetch a sub-directory by *exactly* matching its path relative to the
     /// directory included with `include_dir!()`.
-    pub fn get_dir<S: AsRef<Path>>(&self, path: S) -> Option<Dir<'_>> {
+    pub fn get_dir<S: AsRef<Path>>(&self, path: S) -> Option<Dir<'a>> {
         let path = path.as_ref();
 
         for dir in self.dirs {
@@ -55,7 +55,7 @@ impl<'a> Dir<'a> {
 
     /// Fetch a sub-directory by *exactly* matching its path relative to the
     /// directory included with `include_dir!()`.
-    pub fn get_file<S: AsRef<Path>>(&self, path: S) -> Option<File<'_>> {
+    pub fn get_file<S: AsRef<Path>>(&self, path: S) -> Option<File<'a>> {
         let path = path.as_ref();
 
         for file in self.files {
