@@ -43,7 +43,7 @@
     missing_copy_implementations,
     missing_debug_implementations,
     missing_docs,
-    rust_2018_idioms,
+    rust_2018_idioms
 )]
 
 #[allow(unused_imports)]
