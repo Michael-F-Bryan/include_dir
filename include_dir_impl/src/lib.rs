@@ -18,10 +18,19 @@ mod file;
 
 #[proc_macro_hack]
 pub fn include_dir(input: TokenStream) -> TokenStream {
-    let input: LitStr = parse_macro_input!(input as LitStr);
-    let crate_root = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let root = env::var("CARGO_MANIFEST_DIR").unwrap();
+    include_dir_from_root(root, input)
+}
 
-    let path = PathBuf::from(crate_root).join(input.value());
+#[proc_macro_hack]
+pub fn include_dir_from_out_dir(input: TokenStream) -> TokenStream {
+    let root = env::var("OUT_DIR").unwrap();
+    include_dir_from_root(root, input)
+}
+
+fn include_dir_from_root(root: String, input: TokenStream) -> TokenStream {
+    let input: LitStr = parse_macro_input!(input as LitStr);
+    let path = PathBuf::from(root).join(input.value());
 
     if !path.exists() {
         panic!("\"{}\" doesn't exist", path.display());
