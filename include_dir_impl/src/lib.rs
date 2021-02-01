@@ -10,25 +10,25 @@ use quote::quote;
 use syn::{parse_macro_input, LitStr};
 
 use crate::dir::Dir;
-use std::env;
 use std::path::PathBuf;
+use std::{env, ffi::OsString};
 
 mod dir;
 mod file;
 
 #[proc_macro_hack]
 pub fn include_dir(input: TokenStream) -> TokenStream {
-    let root = env::var("CARGO_MANIFEST_DIR").unwrap();
+    let root = env::var_os("CARGO_MANIFEST_DIR").unwrap();
     include_dir_from_root(root, input)
 }
 
 #[proc_macro_hack]
 pub fn include_dir_from_out_dir(input: TokenStream) -> TokenStream {
-    let root = env::var("OUT_DIR").unwrap();
+    let root = env::var_os("OUT_DIR").unwrap();
     include_dir_from_root(root, input)
 }
 
-fn include_dir_from_root(root: String, input: TokenStream) -> TokenStream {
+fn include_dir_from_root(root: OsString, input: TokenStream) -> TokenStream {
     let input: LitStr = parse_macro_input!(input as LitStr);
     let path = PathBuf::from(root).join(input.value());
 
