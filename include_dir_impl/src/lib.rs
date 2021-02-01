@@ -24,7 +24,8 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
 
 #[proc_macro_hack]
 pub fn include_dir_from_out_dir(input: TokenStream) -> TokenStream {
-    let root = env::var_os("OUT_DIR").unwrap();
+    let root = env::var_os("OUT_DIR")
+        .unwrap_or_else(|| panic!("OUT_DIR environment variable is not defined"));
     include_dir_from_root(root, input)
 }
 
