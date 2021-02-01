@@ -4,8 +4,13 @@
 //! # Examples
 //!
 //! The `include_dir!()` macro will include a directory **relative to the
-//! project root** (using the `CARGO_MANIFEST_DIR` variable), in this example
-//! the source code for the `include_dir` crate has been included inside itself.
+//! project root** (using the `CARGO_MANIFEST_DIR` variable).
+//!
+//! The `include_dir_from_out_dir!()` macro will include a directory relative to
+//! the build script output directory (using the `OUT_DIR` variable).
+//!
+//! In this example, the source code for the `include_dir` crate has been
+//! included inside itself.
 //!
 //! ```rust
 //! use include_dir::{include_dir, Dir};
@@ -63,11 +68,13 @@ pub use crate::file::File;
 #[cfg(feature = "search")]
 pub use crate::globs::DirEntry;
 
-#[doc(hidden)]
+/// Includes a directory relative to the project root
+/// (using the `CARGO_MANIFEST_DIR` variable).
 #[proc_macro_hack]
 pub use include_dir_impl::include_dir;
 
-#[doc(hidden)]
+/// Includes a directory relative to the build script output directory
+/// (using the `OUT_DIR` variable).
 #[proc_macro_hack]
 pub use include_dir_impl::include_dir_from_out_dir;
 
