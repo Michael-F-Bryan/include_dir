@@ -1,5 +1,6 @@
 use include_dir::{include_dir, Dir};
 use std::path::Path;
+use tempdir::TempDir;
 
 const PARENT_DIR: Dir<'_> = include_dir!(".");
 
@@ -7,6 +8,23 @@ const PARENT_DIR: Dir<'_> = include_dir!(".");
 fn included_all_files() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
     println!("{:#?}", PARENT_DIR);
+
+    validate_directory(PARENT_DIR, root, root);
+}
+
+#[test]
+fn extract_all_files() {
+    let tmpdir = TempDir::new(
+        format!(
+            "{}-{}-test",
+            env!("CARGO_PKG_NAME"),
+            env!("CARGO_PKG_VERSION")
+        )
+        .as_str(),
+    )
+    .unwrap();
+    let root = tmpdir.path();
+    PARENT_DIR.extract(root).unwrap();
 
     validate_directory(PARENT_DIR, root, root);
 }

@@ -1,4 +1,6 @@
 use crate::file::File;
+use std::fs;
+use std::io::Write;
 use std::path::Path;
 
 /// A directory entry.
@@ -71,5 +73,34 @@ impl<'a> Dir<'a> {
         }
 
         None
+    }
+
+    /// Create directories and extract all files to real filesystem.
+    /// Creates parent directories of `path` if they do not already exist.
+    /// Fails if some files already exist.
+    /// In case of error, partially extracted directory may remain on the filesystem.
+    pub fn extract<S: AsRef<Path>>(&self, path: S) -> std::io::Result<()> {
+        let path = path.as_ref();
+
+        // create directories first
+        for dir in self.dirs() {
+            fs::create_dir_all(path.join(dir.path()))?;
+        }
+
+        for file in self
+            .dirs()
+            .iter()
+            .flat_map(|d| d.files())
+            .chain(self.files())
+        {
+            let mut fsf = fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(path.join(file.path()))?;
+            fsf.write_all(file.contents())?;
+            fsf.sync_all()?;
+        }
+
+        Ok(())
     }
 }

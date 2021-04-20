@@ -27,6 +27,9 @@ glob = { version = "0.3", optional = true }
 proc-macro-hack = "0.5"
 include_dir_impl = "=0.6.0"
 
+[dev-dependencies]
+tempdir = "0.3"
+
 [features]
 default = [ "search" ]
 example-output = []
