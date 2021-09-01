@@ -29,6 +29,7 @@ fn extract_all_files() {
     validate_directory(PARENT_DIR, root, root);
 }
 
+// TODO this needs to check that each file in the directory is present rather than checking that each extracted file is in the directory!
 fn validate_directory(dir: Dir<'_>, path: &Path, root: &Path) {
     for entry in path.read_dir().unwrap() {
         let entry = entry.unwrap().path();
