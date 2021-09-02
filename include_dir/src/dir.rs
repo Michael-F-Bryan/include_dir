@@ -80,27 +80,29 @@ impl<'a> Dir<'a> {
     /// Fails if some files already exist.
     /// In case of error, partially extracted directory may remain on the filesystem.
     pub fn extract<S: AsRef<Path>>(&self, path: S) -> std::io::Result<()> {
-        let path = path.as_ref();
+        // Extracts the given directory entry to the given path
+        // We use this internally for recursing on subdirectories
+        fn extract_dir<S: AsRef<Path>>(dir: Dir<'_>, path: S) -> std::io::Result<()> {
+            let path = path.as_ref();
+            // Create all the subdirectories in here (but not their files yet)
+            for dir in dir.dirs() {
+                fs::create_dir_all(path.join(dir.path()))?;
+                extract_dir(*dir, path)?;
+            }
 
-        // create directories first
-        for dir in self.dirs() {
-            fs::create_dir_all(path.join(dir.path()))?;
+            // Only write files at the root of this directory (we recurse on subdirectories)
+            for file in dir.files() {
+                let mut fsf = fs::OpenOptions::new()
+                    .write(true)
+                    .create_new(true)
+                    .open(path.join(file.path()))?;
+                fsf.write_all(file.contents())?;
+                fsf.sync_all()?;
+            }
+
+            Ok(())
         }
 
-        for file in self
-            .dirs()
-            .iter()
-            .flat_map(|d| d.files())
-            .chain(self.files())
-        {
-            let mut fsf = fs::OpenOptions::new()
-                .write(true)
-                .create_new(true)
-                .open(path.join(file.path()))?;
-            fsf.write_all(file.contents())?;
-            fsf.sync_all()?;
-        }
-
-        Ok(())
+        extract_dir(*self, path)
     }
 }
