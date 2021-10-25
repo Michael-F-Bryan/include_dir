@@ -17,7 +17,7 @@ impl Dir {
         let abs_path = path.into();
         let root = root.as_ref();
 
-        let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
+        let root_rel_path = abs_path.strip_prefix(&root)?.to_path_buf();
 
         if !abs_path.exists() {
             return Err(format_err!("The directory doesn't exist"));
