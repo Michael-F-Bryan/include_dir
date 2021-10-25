@@ -2,16 +2,28 @@ use crate::file::File;
 use std::fs;
 use std::io::Write;
 use std::path::Path;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 /// A directory entry.
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct Dir<'a> {
     #[doc(hidden)]
     pub path: &'a str,
+
     #[doc(hidden)]
     pub files: &'a [File<'a>],
+
     #[doc(hidden)]
     pub dirs: &'a [Dir<'a>],
+
+    #[doc(hidden)]
+    pub modified: Option<f64>,
+
+    #[doc(hidden)]
+    pub created: Option<f64>,
+
+    #[doc(hidden)]
+    pub accessed: Option<f64>,
 }
 
 impl<'a> Dir<'a> {
@@ -104,5 +116,26 @@ impl<'a> Dir<'a> {
         }
 
         extract_dir(*self, path)
+    }
+
+    /// The directory's created timestamp as of compilation time, if
+    /// available
+    pub fn created(&self) -> Option<SystemTime> {
+        self.created
+            .map(|secs| UNIX_EPOCH + Duration::from_secs_f64(secs))
+    }
+
+    /// The directory's last modified timestamp as of compilation
+    /// time, if available
+    pub fn modified(&self) -> Option<SystemTime> {
+        self.modified
+            .map(|secs| UNIX_EPOCH + Duration::from_secs_f64(secs))
+    }
+
+    /// The directory's last accessed timestamp as of compilation
+    /// time, if available
+    pub fn accessed(&self) -> Option<SystemTime> {
+        self.accessed
+            .map(|secs| UNIX_EPOCH + Duration::from_secs_f64(secs))
     }
 }

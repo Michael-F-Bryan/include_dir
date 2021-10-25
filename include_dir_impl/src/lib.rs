@@ -6,12 +6,13 @@ extern crate proc_macro;
 
 use proc_macro::TokenStream;
 use proc_macro_hack::proc_macro_hack;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{parse_macro_input, LitStr};
 
 use crate::dir::Dir;
 use std::env;
 use std::path::PathBuf;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 mod dir;
 mod file;
@@ -34,4 +35,14 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
     TokenStream::from(quote! {
         #dir
     })
+}
+
+pub(crate) fn timestamp_to_tokenstream(
+    time: std::io::Result<SystemTime>,
+) -> proc_macro2::TokenStream {
+    time.ok()
+        .and_then(|m| m.duration_since(UNIX_EPOCH).ok())
+        .map(|dur| dur.as_secs_f64())
+        .map(|secs| quote! { Some(#secs) }.to_token_stream())
+        .unwrap_or_else(|| quote! { None }.to_token_stream())
 }

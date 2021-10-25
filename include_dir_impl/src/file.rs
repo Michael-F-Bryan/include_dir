@@ -1,10 +1,10 @@
+use crate::timestamp_to_tokenstream;
 use anyhow::Error;
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use std::{
     fs::Metadata,
     path::{Path, PathBuf},
-    time::{SystemTime, UNIX_EPOCH},
 };
 
 #[derive(Debug, Clone)]
@@ -54,12 +54,4 @@ impl ToTokens for File {
 
         tok.to_tokens(tokens);
     }
-}
-
-fn timestamp_to_tokenstream(time: std::io::Result<SystemTime>) -> TokenStream {
-    time.ok()
-        .and_then(|m| m.duration_since(UNIX_EPOCH).ok())
-        .map(|dur| dur.as_secs_f64())
-        .map(|secs| quote! { Some(#secs) }.to_token_stream())
-        .unwrap_or_else(|| quote! { None }.to_token_stream())
 }

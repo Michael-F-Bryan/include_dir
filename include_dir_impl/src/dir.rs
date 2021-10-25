@@ -1,15 +1,28 @@
-use crate::file::File;
+use crate::{file::File, timestamp_to_tokenstream};
 use anyhow::{self, format_err, Context, Error};
 use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
-use std::path::{Path, PathBuf};
+use std::{
+    fs::Metadata,
+    path::{Path, PathBuf},
+};
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 pub(crate) struct Dir {
     root_rel_path: PathBuf,
     abs_path: PathBuf,
     files: Vec<File>,
     dirs: Vec<Dir>,
+    metadata: Metadata,
+}
+
+impl PartialEq for Dir {
+    fn eq(&self, other: &Self) -> bool {
+        self.root_rel_path == other.root_rel_path
+            && self.abs_path == other.abs_path
+            && self.files == other.files
+            && self.dirs == other.dirs
+    }
 }
 
 impl Dir {
@@ -18,6 +31,7 @@ impl Dir {
         let root = root.as_ref();
 
         let root_rel_path = abs_path.strip_prefix(&root).unwrap().to_path_buf();
+        let metadata = std::fs::metadata(&abs_path)?;
 
         if !abs_path.exists() {
             return Err(format_err!("The directory doesn't exist"));
@@ -41,6 +55,7 @@ impl Dir {
             abs_path,
             files,
             dirs,
+            metadata,
         })
     }
 }
@@ -50,6 +65,9 @@ impl ToTokens for Dir {
         let root_rel_path = self.root_rel_path.display().to_string();
         let files = &self.files;
         let dirs = &self.dirs;
+        let created = timestamp_to_tokenstream(self.metadata.created());
+        let modified = timestamp_to_tokenstream(self.metadata.modified());
+        let accessed = timestamp_to_tokenstream(self.metadata.accessed());
 
         let tok = quote! {
             $crate::Dir {
@@ -60,6 +78,9 @@ impl ToTokens for Dir {
                 dirs: &[#(
                     #dirs
                  ),*],
+                created: #created,
+                modified: #modified,
+                accessed: #accessed,
             }
         };
 
