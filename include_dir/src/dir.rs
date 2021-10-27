@@ -14,6 +14,15 @@ pub struct Dir<'a> {
     pub dirs: &'a [Dir<'a>],
 }
 
+/// Modes in which a directory entry can be extracted to disk.
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub enum ExtractMode {
+    /// Halts the extraction on file name collision.
+    FailIfExists,
+    /// Overwrites all colliding files.
+    Overwrite,
+}
+
 impl<'a> Dir<'a> {
     /// Get the directory's path.
     pub fn path(&self) -> &'a Path {
@@ -77,24 +86,29 @@ impl<'a> Dir<'a> {
 
     /// Create directories and extract all files to real filesystem.
     /// Creates parent directories of `path` if they do not already exist.
-    /// Fails if some files already exist.
     /// In case of error, partially extracted directory may remain on the filesystem.
-    pub fn extract<S: AsRef<Path>>(&self, path: S) -> std::io::Result<()> {
+    pub fn extract<S: AsRef<Path>>(&self, path: S, mode: ExtractMode) -> std::io::Result<()> {
         // Extracts the given directory entry to the given path
         // We use this internally for recursing on subdirectories
-        fn extract_dir<S: AsRef<Path>>(dir: Dir<'_>, path: S) -> std::io::Result<()> {
+        fn extract_dir<S: AsRef<Path>>(
+            dir: Dir<'_>,
+            path: S,
+            mode: ExtractMode,
+        ) -> std::io::Result<()> {
             let path = path.as_ref();
             // Create all the subdirectories in here (but not their files yet)
             for dir in dir.dirs() {
                 fs::create_dir_all(path.join(dir.path()))?;
-                extract_dir(*dir, path)?;
+                extract_dir(*dir, path, mode)?;
             }
 
             // Only write files at the root of this directory (we recurse on subdirectories)
             for file in dir.files() {
                 let mut fsf = fs::OpenOptions::new()
                     .write(true)
-                    .create_new(true)
+                    .create_new(mode == ExtractMode::FailIfExists)
+                    .create(mode == ExtractMode::Overwrite)
+                    .truncate(mode == ExtractMode::Overwrite)
                     .open(path.join(file.path()))?;
                 fsf.write_all(file.contents())?;
                 fsf.sync_all()?;
@@ -103,6 +117,6 @@ impl<'a> Dir<'a> {
             Ok(())
         }
 
-        extract_dir(*self, path)
+        extract_dir(*self, path, mode)
     }
 }

@@ -1,4 +1,4 @@
-use include_dir::{include_dir, Dir};
+use include_dir::{dir::ExtractMode, include_dir, Dir};
 use std::path::Path;
 use tempdir::TempDir;
 
@@ -12,9 +12,8 @@ fn included_all_files() {
     validate_included(PARENT_DIR, root, root);
 }
 
-#[test]
-fn extract_all_files() {
-    let tmpdir = TempDir::new(
+fn tempdir() -> Result<TempDir, std::io::Error> {
+    TempDir::new(
         format!(
             "{}-{}-test",
             env!("CARGO_PKG_NAME"),
@@ -22,10 +21,27 @@ fn extract_all_files() {
         )
         .as_str(),
     )
-    .unwrap();
-    let root = tmpdir.path();
-    PARENT_DIR.extract(root).unwrap();
+}
 
+#[test]
+fn extract_all_files_fail() {
+    let tmpdir = tempdir().unwrap();
+    let root = tmpdir.path();
+    PARENT_DIR.extract(root, ExtractMode::FailIfExists).unwrap();
+    validate_extracted(PARENT_DIR, root);
+
+    assert!(PARENT_DIR.extract(root, ExtractMode::FailIfExists).is_err());
+}
+
+#[test]
+fn extract_all_files_overwrite() {
+    let tmpdir = tempdir().unwrap();
+    let root = tmpdir.path();
+
+    PARENT_DIR.extract(root, ExtractMode::Overwrite).unwrap();
+    validate_extracted(PARENT_DIR, root);
+
+    PARENT_DIR.extract(root, ExtractMode::Overwrite).unwrap();
     validate_extracted(PARENT_DIR, root);
 }
 
