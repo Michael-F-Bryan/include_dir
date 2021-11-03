@@ -24,13 +24,7 @@ repository = "Michael-F-Bryan/include_dir"
 
 [dependencies]
 glob = { version = "0.3", optional = true }
-proc-macro-hack = "0.5"
-include_dir_impl = { version = "=0.6.3-alpha.0", path = "../include_dir_impl" }
+include_dir_macros = { version = "0.1.0", path = "../macros" }
 
 [dev-dependencies]
 tempdir = "0.3"
-
-[features]
-default = [ "search" ]
-example-output = []
-search = [ "glob" ]

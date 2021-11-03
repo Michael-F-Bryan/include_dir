@@ -3,23 +3,26 @@ use std::path::Path;
 use std::str;
 
 /// A file with its contents stored in a `&'static [u8]`.
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct File<'a> {
-    #[doc(hidden)]
-    pub path: &'a str,
-    #[doc(hidden)]
-    pub contents: &'a [u8],
+    path: &'a str,
+    contents: &'a [u8],
 }
 
 impl<'a> File<'a> {
-    /// The file's path, relative to the directory included with
-    /// `include_dir!()`.
+    /// Create a new [`File`].
+    pub const fn new(path: &'a str, contents: &'a [u8]) -> Self {
+        File { path, contents }
+    }
+
+    /// The full path for this [`File`], relative to the directory passed to
+    /// [`crate::include_dir!()`].
     pub fn path(&self) -> &'a Path {
         Path::new(self.path)
     }
 
     /// The file's raw contents.
-    pub fn contents(&self) -> &'a [u8] {
+    pub const fn contents(&self) -> &'a [u8] {
         self.contents
     }
 

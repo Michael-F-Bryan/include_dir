@@ -1,5 +1,5 @@
 [package]
-name = "include_dir_macro"
+name = "include_dir_macros"
 version = "0.1.0"
 edition = "2021"
 

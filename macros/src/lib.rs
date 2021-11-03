@@ -51,7 +51,7 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
                 include_dir::DirEntry::Dir(#tokens)
             });
         } else if child.is_file() {
-            let tokens = expand_file(&child);
+            let tokens = expand_file(root, &child);
             child_tokens.push(quote! {
                 include_dir::DirEntry::File(#tokens)
             });
@@ -67,14 +67,12 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     }
 }
 
-fn expand_file(path: &Path) -> proc_macro2::TokenStream {
+fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     let contents = std::fs::read(path)
         .unwrap_or_else(|e| panic!("Unable to read \"{}\": {}", path.display(), e));
     let literal = Literal::byte_string(&contents);
-    let path = path
-        .file_name()
-        .expect("Files always have a name")
-        .to_string_lossy();
+
+    let path = path.strip_prefix(root).unwrap().to_string_lossy();
 
     let tokens = quote! {
         include_dir::File::new(#path, #literal)

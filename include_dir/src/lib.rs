@@ -43,30 +43,20 @@
     missing_copy_implementations,
     missing_debug_implementations,
     missing_docs,
-    rust_2018_idioms,
+    rust_2018_idioms
 )]
 
-#[allow(unused_imports)]
-#[macro_use]
-extern crate include_dir_impl;
-#[macro_use]
-extern crate proc_macro_hack;
-
 mod dir;
+mod dir_entry;
 mod file;
 
 #[cfg(feature = "search")]
 mod globs;
 
 pub use crate::dir::Dir;
+pub use crate::dir_entry::DirEntry;
 pub use crate::file::File;
 #[cfg(feature = "search")]
 pub use crate::globs::DirEntry;
 
-#[doc(hidden)]
-#[proc_macro_hack]
-pub use include_dir_impl::include_dir;
-
-/// Example the output generated when running `include_dir!()` on itself.
-#[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir<'_> = include_dir!(".");
+pub use include_dir_macros::include_dir;
