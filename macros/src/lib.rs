@@ -1,23 +1,103 @@
+use proc_macro::{TokenStream, TokenTree};
+use proc_macro2::Literal;
+use quote::quote;
 use std::{
     error::Error,
     fmt::{self, Display, Formatter},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
-
-use proc_macro::{TokenStream, TokenTree};
 
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
     let tokens: Vec<_> = input.into_iter().collect();
 
     let path = match tokens.as_slice() {
-        [TokenTree::Literal(lit)] => lit.to_string(),
-        _ => panic!("This macro only accepts a single string argument"),
+        [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
+        _ => panic!("This macro only accepts a single, non-empty string argument"),
     };
 
     let path = resolve_path(&path, get_env).unwrap();
 
-    todo!()
+    expand_dir(&path, &path).into()
+}
+
+fn unwrap_string_literal(lit: &proc_macro::Literal) -> String {
+    let mut repr = lit.to_string();
+    if !repr.starts_with('"') || !repr.starts_with('"') {
+        panic!("This macro only accepts a single, non-empty string argument")
+    }
+
+    repr.remove(0);
+    repr.pop();
+
+    repr
+}
+
+fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
+    let children = read_dir(path).unwrap_or_else(|e| {
+        panic!(
+            "Unable to read the entries in \"{}\": {}",
+            path.display(),
+            e
+        )
+    });
+
+    let mut child_tokens = Vec::new();
+
+    for child in children {
+        if child.is_dir() {
+            let tokens = expand_dir(root, &child);
+            child_tokens.push(quote! {
+                include_dir::DirEntry::Dir(#tokens)
+            });
+        } else if child.is_file() {
+            let tokens = expand_file(&child);
+            child_tokens.push(quote! {
+                include_dir::DirEntry::File(#tokens)
+            });
+        } else {
+            panic!("\"{}\" is neither a file nor a directory", child.display());
+        }
+    }
+
+    let path = path.strip_prefix(root).unwrap().to_string_lossy();
+
+    quote! {
+        include_dir::Dir::new(#path, &[ #(#child_tokens),* ])
+    }
+}
+
+fn expand_file(path: &Path) -> proc_macro2::TokenStream {
+    let contents = std::fs::read(path)
+        .unwrap_or_else(|e| panic!("Unable to read \"{}\": {}", path.display(), e));
+    let literal = Literal::byte_string(&contents);
+    let path = path
+        .file_name()
+        .expect("Files always have a name")
+        .to_string_lossy();
+
+    let tokens = quote! {
+        include_dir::File::new(#path, #literal)
+    };
+
+    tokens
+}
+
+fn read_dir(dir: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
+    if !dir.is_dir() {
+        panic!("\"{}\" is not a directory", dir.display());
+    }
+
+    let mut paths = Vec::new();
+
+    for entry in dir.read_dir()? {
+        let entry = entry?;
+        paths.push(entry.path());
+    }
+
+    paths.sort();
+
+    Ok(paths)
 }
 
 fn get_env(variable: &str) -> Option<String> {
