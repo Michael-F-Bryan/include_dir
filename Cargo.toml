@@ -1,2 +1,2 @@
 [workspace]
-members = ["include_dir", "include_dir_impl"]
+members = ["include_dir", "include_dir_impl", "macros"]
