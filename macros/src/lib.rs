@@ -217,9 +217,9 @@ fn get_env(variable: &str) -> Option<String> {
     std::env::var(variable).ok()
 }
 
-fn track_path(path: &Path) {
+fn track_path(_path: &Path) {
     #[cfg(feature = "nightly")]
-    proc_macro::tracked_path::path(path.to_string_lossy());
+    proc_macro::tracked_path::path(_path.to_string_lossy());
 }
 
 #[cfg(test)]

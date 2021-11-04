@@ -2,7 +2,7 @@ use include_dir::{include_dir, Dir};
 use std::path::Path;
 use tempdir::TempDir;
 
-const PARENT_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR");
+static PARENT_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR");
 
 #[test]
 fn included_all_files() {

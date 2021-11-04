@@ -3,7 +3,7 @@ use std::path::Path;
 use std::str;
 
 /// A file with its contents stored in a `&'static [u8]`.
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct File<'a> {
     path: &'a str,
     contents: &'a [u8],
@@ -22,12 +22,12 @@ impl<'a> File<'a> {
     }
 
     /// The file's raw contents.
-    pub const fn contents(&self) -> &'a [u8] {
+    pub fn contents(&self) -> &[u8] {
         self.contents
     }
 
     /// The file's contents interpreted as a string.
-    pub fn contents_utf8(&self) -> Option<&'a str> {
+    pub fn contents_utf8(&self) -> Option<&str> {
         str::from_utf8(self.contents()).ok()
     }
 }
