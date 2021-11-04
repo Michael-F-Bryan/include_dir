@@ -19,3 +19,4 @@ quote = "1.0.10"
 
 [features]
 nightly = []
+metadata = []

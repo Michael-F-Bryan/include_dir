@@ -33,3 +33,4 @@ tempdir = "0.3"
 [features]
 default = []
 nightly = ["include_dir_macros/nightly"]
+metadata = ["include_dir_macros/metadata"]

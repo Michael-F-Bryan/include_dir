@@ -7,6 +7,7 @@ use std::{
     error::Error,
     fmt::{self, Display, Formatter},
     path::{Path, PathBuf},
+    time::SystemTime,
 };
 
 #[proc_macro]
@@ -73,13 +74,39 @@ fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     let contents = read_file(path);
     let literal = Literal::byte_string(&contents);
 
-    let path = normalize_path(root, path);
+    let normalized_path = normalize_path(root, path);
 
     let tokens = quote! {
-        include_dir::File::new(#path, #literal)
+        include_dir::File::new(#normalized_path, #literal)
     };
 
-    tokens
+    match metadata(path) {
+        Some(metadata) => quote!(#tokens.with_metadata(#metadata)),
+        None => tokens,
+    }
+}
+
+fn metadata(path: &Path) -> Option<proc_macro2::TokenStream> {
+    fn to_unix(t: SystemTime) -> u64 {
+        t.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs()
+    }
+
+    if !cfg!(feature = "metadata") {
+        return None;
+    }
+
+    let meta = path.metadata().ok()?;
+    let accessed = meta.accessed().map(to_unix).ok()?;
+    let created = meta.created().map(to_unix).ok()?;
+    let modified = meta.modified().map(to_unix).ok()?;
+
+    Some(quote! {
+        include_dir::Metadata::new(
+            std::time::Duration::from_secs(#accessed),
+            std::time::Duration::from_secs(#created),
+            std::time::Duration::from_secs(#modified),
+        )
+    })
 }
 
 /// Make sure that paths use the same separator regardless of whether the host

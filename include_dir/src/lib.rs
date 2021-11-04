@@ -49,6 +49,9 @@
 //! functionality. These are:
 //!
 //! - `glob` - search for files using glob patterns
+//! - `metadata` - include some basic filesystem metadata like last modified
+//!   time. This is not enabled by default to allow for reproducible builds
+//!   and to hide potentially identifying information.
 //! - `nightly` - enables nightly APIs like [`track_path`][track-path]
 //!   and  [`proc_macro_tracked_env`][tracked-env]. This gives the compiler
 //!   more information about what is accessed by the procedural macro, enabling
@@ -75,10 +78,9 @@ mod file;
 #[cfg(feature = "glob")]
 mod globs;
 
-pub use crate::dir::Dir;
-pub use crate::dir_entry::DirEntry;
-pub use crate::file::File;
-
+#[cfg(feature = "metadata")]
+pub use crate::file::Metadata;
+pub use crate::{dir::Dir, dir_entry::DirEntry, file::File};
 pub use include_dir_macros::include_dir;
 
 // #[cfg(rustdoc)]
