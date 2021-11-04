@@ -8,7 +8,8 @@ readme = "../README.md"
 keywords = ["assets", "include", "embed", "dir"]
 repository = "https://github.com/Michael-F-Bryan/include_dir"
 categories = ["development-tools", "web-programming", "game-engines"]
-edition = "2018"
+edition = "2021"
+rust-version = "1.56"
 
 [package.metadata.docs.rs]
 all-features = true

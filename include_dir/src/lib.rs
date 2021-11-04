@@ -80,3 +80,8 @@ pub use crate::dir_entry::DirEntry;
 pub use crate::file::File;
 
 pub use include_dir_macros::include_dir;
+
+// #[cfg(rustdoc)]
+#[doc = include_str!("../../README.md")]
+#[allow(dead_code)]
+fn check_readme_examples() {}
