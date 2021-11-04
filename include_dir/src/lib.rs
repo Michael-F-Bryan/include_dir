@@ -1,17 +1,30 @@
-//! An extension to the `include_str!()` and `include_bytes!()` macro for embedding an entire
-//! directory tree into your binary.
+//! An extension to the `include_str!()` and `include_bytes!()` macro for
+//! embedding an entire directory tree into your binary.
+//!
+//! # Environment Variables
+//!
+//! When invoking the [`include_dir!()`] macro you should try to avoid using
+//! relative paths because `rustc` makes no guarantees about the current
+//! directory when it is running a procedural macro.
+//!
+//! You can use environment variable interpolation to remedy this.
+//!
+//! For example, to include a folder relative to your crate you might use
+//! `include_dir!("$CARGO_MANIFEST_DIR/assets").
 //!
 //! # Examples
 //!
-//! The `include_dir!()` macro will include a directory **relative to the
-//! project root** (using the `CARGO_MANIFEST_DIR` variable), in this example
-//! the source code for the `include_dir` crate has been included inside itself.
+//! Here is an example that embeds the `include_dir` crate's source code in a
+//! `const` so we can play around with it.
+//!
+//! In general, you should prefer to store the result of `include_dir!()` in a
+//! `static` variable.
 //!
 //! ```rust
 //! use include_dir::{include_dir, Dir};
 //! use std::path::Path;
 //!
-//! const PROJECT_DIR: Dir = include_dir!(".");
+//! static PROJECT_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR");
 //!
 //! // of course, you can retrieve a file by its full path
 //! let lib_rs = PROJECT_DIR.get_file("src/lib.rs").unwrap();
@@ -20,8 +33,8 @@
 //! let body = lib_rs.contents_utf8().unwrap();
 //! assert!(body.contains("SOME_INTERESTING_STRING"));
 //!
-//! // if you enable the `search` feature, you can for files (and directories) using glob patterns
-//! #[cfg(feature = "search")]
+//! // if you enable the `glob` feature, you can for files (and directories) using glob patterns
+//! #[cfg(feature = "glob")]
 //! {
 //!     let glob = "**/*.rs";
 //!     for entry in PROJECT_DIR.find(glob).unwrap() {
@@ -35,7 +48,36 @@
 //! This library exposes a couple feature flags for enabling and disabling extra
 //! functionality. These are:
 //!
-//! - **example:** compile in an example of the embedded directory tree
+//! - `glob` - search for files using glob patterns
+//! - `metadata` - include some basic filesystem metadata like last modified
+//!   time. This is not enabled by default to allow for reproducible builds
+//!   and to hide potentially identifying information.
+//! - `nightly` - enables nightly APIs like [`track_path`][track-path]
+//!   and  [`proc_macro_tracked_env`][tracked-env]. This gives the compiler
+//!   more information about what is accessed by the procedural macro, enabling
+//!   better caching. Functionality behind this feature flag is unstable and
+//!   may change at any time.
+//!
+//! # Compile Time Considerations
+//!
+//! While the `include_dir!()` macro executes relatively quickly, it expands
+//! to a fairly large amount of code (all your files are essentially embedded
+//! as Rust byte strings) and this may have a flow-on effect on the build
+//! process.
+//!
+//! In particular, try to avoid including a large number or files or files which
+//! are particularly big because it may cause the compiler to run out of memory
+//! or spend a large amount of time parsing your code.
+//!
+//! As one data point, this crate's `target/` directory contained 620
+//! files with a total of 64 MB, with a full build taking about 1.5 seconds and
+//! 200MB of RAM to generate a 7MB binary.
+//!
+//! Using `include_dir!("target/")` increased the compile time to 5 seconds
+//! and used 730MB of RAM, generating a 72MB binary.
+//!
+//! [tracked-env]: https://github.com/rust-lang/rust/issues/74690
+//! [track-path]: https://github.com/rust-lang/rust/issues/73921
 
 #![deny(
     elided_lifetimes_in_paths,
@@ -43,30 +85,23 @@
     missing_copy_implementations,
     missing_debug_implementations,
     missing_docs,
-    rust_2018_idioms,
+    rust_2018_idioms
 )]
-
-#[allow(unused_imports)]
-#[macro_use]
-extern crate include_dir_impl;
-#[macro_use]
-extern crate proc_macro_hack;
+#![cfg_attr(feature = "nightly", feature(doc_cfg))]
 
 mod dir;
+mod dir_entry;
 mod file;
 
-#[cfg(feature = "search")]
+#[cfg(feature = "glob")]
 mod globs;
 
-pub use crate::dir::Dir;
-pub use crate::file::File;
-#[cfg(feature = "search")]
-pub use crate::globs::DirEntry;
+#[cfg(feature = "metadata")]
+pub use crate::file::Metadata;
+pub use crate::{dir::Dir, dir_entry::DirEntry, file::File};
+pub use include_dir_macros::include_dir;
 
-#[doc(hidden)]
-#[proc_macro_hack]
-pub use include_dir_impl::include_dir;
-
-/// Example the output generated when running `include_dir!()` on itself.
-#[cfg(feature = "example-output")]
-pub static GENERATED_EXAMPLE: Dir<'_> = include_dir!(".");
+// #[cfg(rustdoc)]
+#[doc = include_str!("../../README.md")]
+#[allow(dead_code)]
+fn check_readme_examples() {}

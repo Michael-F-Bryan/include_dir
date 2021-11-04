@@ -1,0 +1,63 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Compile and Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rust:
+          - nightly
+          - stable
+          # MSRV
+          - 1.56.1
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --workspace --verbose
+      - uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --workspace --verbose
+      - uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --workspace --verbose
+
+  api-docs:
+    name: Publish API Docs to GitHub Pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: nightly
+          override: true
+      - uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --workspace --verbose --all-features
+      - name: Redirect top-level GitHub Pages
+        run: "echo '<meta http-equiv=\"refresh\" content=\"0; url=include_dir/index.html\" />' > target/doc/index.html"
+        shell: bash
+      - name: Upload API Docs
+        uses: JamesIves/github-pages-deploy-action@4.1.1
+        if: github.ref == 'refs/heads/master'
+        with:
+          branch: gh-pages
+          folder: target/doc
