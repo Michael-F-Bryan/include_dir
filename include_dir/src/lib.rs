@@ -58,6 +58,24 @@
 //!   better caching. Functionality behind this feature flag is unstable and
 //!   may change at any time.
 //!
+//! # Compile Time Considerations
+//!
+//! While the `include_dir!()` macro executes relatively quickly, it expands
+//! to a fairly large amount of code (all your files are essentially embedded
+//! as Rust byte strings) and this may have a flow-on effect on the build
+//! process.
+//!
+//! In particular, try to avoid including a large number or files or files which
+//! are particularly big because it may cause the compiler to run out of memory
+//! or spend a large amount of time parsing your code.
+//!
+//! As one data point, this crate's `target/` directory contained 620
+//! files with a total of 64 MB, with a full build taking about 1.5 seconds and
+//! 200MB of RAM to generate a 7MB binary.
+//!
+//! Using `include_dir!("target/")` increased the compile time to 5 seconds
+//! and used 730MB of RAM, generating a 72MB binary.
+//!
 //! [tracked-env]: https://github.com/rust-lang/rust/issues/74690
 //! [track-path]: https://github.com/rust-lang/rust/issues/73921
 
