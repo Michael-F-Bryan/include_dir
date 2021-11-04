@@ -28,3 +28,7 @@ include_dir_macros = { version = "0.1.0", path = "../macros" }
 
 [dev-dependencies]
 tempdir = "0.3"
+
+[features]
+default = []
+nightly = ["include_dir_macros/nightly"]

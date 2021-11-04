@@ -28,10 +28,18 @@ impl<'a> DirEntry<'a> {
     }
 
     /// Try to get this as a [`File`], if it is one.
-    pub fn as_file(&self) -> Option<& File<'a>> {
+    pub fn as_file(&self) -> Option<&File<'a>> {
         match self {
             DirEntry::File(f) => Some(f),
             DirEntry::Dir(_) => None,
+        }
+    }
+
+    /// Get this item's sub-items, if it has any.
+    pub fn children(&self) -> &'a [DirEntry<'a>] {
+        match self {
+            DirEntry::Dir(d) => d.entries(),
+            DirEntry::File(_) => &[],
         }
     }
 }

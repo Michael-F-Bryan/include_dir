@@ -1,3 +1,5 @@
+#![cfg_attr(feature = "nightly", feature(track_path, proc_macro_tracked_env))]
+
 use proc_macro::{TokenStream, TokenTree};
 use proc_macro2::Literal;
 use quote::quote;
@@ -60,7 +62,7 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
         }
     }
 
-    let path = path.strip_prefix(root).unwrap().to_string_lossy();
+    let path = normalize_path(root, path);
 
     quote! {
         include_dir::Dir::new(#path, &[ #(#child_tokens),* ])
@@ -68,11 +70,10 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
 }
 
 fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
-    let contents = std::fs::read(path)
-        .unwrap_or_else(|e| panic!("Unable to read \"{}\": {}", path.display(), e));
+    let contents = read_file(path);
     let literal = Literal::byte_string(&contents);
 
-    let path = path.strip_prefix(root).unwrap().to_string_lossy();
+    let path = normalize_path(root, path);
 
     let tokens = quote! {
         include_dir::File::new(#path, #literal)
@@ -81,10 +82,23 @@ fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     tokens
 }
 
+/// Make sure that paths use the same separator regardless of whether the host
+/// machine is Windows or Linux.
+fn normalize_path(root: &Path, path: &Path) -> String {
+    let stripped = path
+        .strip_prefix(root)
+        .expect("Should only ever be called using paths inside the root path");
+    let as_string = stripped.to_string_lossy();
+
+    as_string.replace('\\', "/")
+}
+
 fn read_dir(dir: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     if !dir.is_dir() {
         panic!("\"{}\" is not a directory", dir.display());
     }
+
+    track_path(dir);
 
     let mut paths = Vec::new();
 
@@ -98,8 +112,9 @@ fn read_dir(dir: &Path) -> Result<Vec<PathBuf>, Box<dyn Error>> {
     Ok(paths)
 }
 
-fn get_env(variable: &str) -> Option<String> {
-    std::env::var(variable).ok()
+fn read_file(path: &Path) -> Vec<u8> {
+    track_path(path);
+    std::fs::read(path).unwrap_or_else(|e| panic!("Unable to read \"{}\": {}", path.display(), e))
 }
 
 fn resolve_path(
@@ -190,6 +205,21 @@ fn take_while(s: &str, mut predicate: impl FnMut(char) -> bool) -> (&str, &str) 
     }
 
     s.split_at(index)
+}
+
+#[cfg(feature = "nightly")]
+fn get_env(variable: &str) -> Option<String> {
+    proc_macro::tracked_env::var(variable).ok()
+}
+
+#[cfg(not(feature = "nightly"))]
+fn get_env(variable: &str) -> Option<String> {
+    std::env::var(variable).ok()
+}
+
+fn track_path(path: &Path) {
+    #[cfg(feature = "nightly")]
+    proc_macro::tracked_path::path(path.to_string_lossy());
 }
 
 #[cfg(test)]
