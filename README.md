@@ -1,6 +1,7 @@
 # include_dir
 
-[![license](https://img.shields.io/github/license/Michael-F-Bryan/include_dir.svg)]()
+[![Continuous Integration](https://github.com/Michael-F-Bryan/include_dir/actions/workflows/main.yml/badge.svg)](https://github.com/Michael-F-Bryan/include_dir/actions/workflows/main.yml)
+[![license](https://img.shields.io/github/license/Michael-F-Bryan/include_dir.svg)](LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/include_dir.svg)](https://crates.io/crates/include_dir)
 [![Docs.rs](https://docs.rs/include_dir/badge.svg)](https://docs.rs/include_dir/)
 
@@ -17,9 +18,6 @@ Rendered Documentation:
 The `include_dir!()` macro works very similarly to the normal `include_str!()`
 and `include_bytes!()` macros. You pass the macro a file path and assign the
 returned value to some `static` variable.
-
-Most importantly, the file path **must be relative to the project root** as
-indicated by the `CARGO_MANIFEST_DIR` environment variable.
 
 ```rust
 use include_dir::{include_dir, Dir};
@@ -48,8 +46,8 @@ assert!(body.contains("SOME_INTERESTING_STRING"));
 - Embed a directory tree into your binary at compile time
 - Find a file in the embedded directory
 - Search for files using a glob pattern (requires the `globs` feature)
+- File metadata (requires the `metadata` feature)
 
 To-Do list:
 
-- File metadata
 - Compression?
