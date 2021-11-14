@@ -109,6 +109,6 @@ pub use crate::{dir::Dir, dir_entry::DirEntry, file::File};
 pub use include_dir_macros::include_dir;
 
 // #[cfg(rustdoc)]
-#[doc = include_str!("../../README.md")]
+#[doc = include_str!("../README.md")]
 #[allow(dead_code)]
 fn check_readme_examples() {}
