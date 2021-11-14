@@ -338,7 +338,14 @@
 <span id="338">338</span>
 <span id="339">339</span>
 <span id="340">340</span>
-</pre><pre class="rust"><code><span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>, <span class="ident">feature</span>(<span class="ident">track_path</span>, <span class="ident">proc_macro_tracked_env</span>))]</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+</pre><pre class="rust"><code><span class="doccomment">//! Implementation details of the `include_dir`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! You probably don&#39;t want to use this crate directly.</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>, <span class="ident">feature</span>(<span class="ident">track_path</span>, <span class="ident">proc_macro_tracked_env</span>))]</span>
 
 <span class="kw">use</span> <span class="ident">proc_macro</span>::{<span class="ident">TokenStream</span>, <span class="ident">TokenTree</span>};
 <span class="kw">use</span> <span class="ident">proc_macro2::Literal</span>;
@@ -350,6 +357,7 @@
     <span class="ident">time::SystemTime</span>,
 };
 
+<span class="doccomment">/// Embed the contents of a directory in your crate.</span>
 <span class="attribute">#[<span class="ident">proc_macro</span>]</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">include_dir</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">tokens</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">into_iter</span>().<span class="ident">collect</span>();

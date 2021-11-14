@@ -105,6 +105,13 @@
 <span id="105">105</span>
 <span id="106">106</span>
 <span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
 </pre><pre class="rust"><code><span class="doccomment">//! An extension to the `include_str!()` and `include_bytes!()` macro for</span>
 <span class="doccomment">//! embedding an entire directory tree into your binary.</span>
 <span class="doccomment">//!</span>
@@ -114,18 +121,18 @@
 <span class="doccomment">//! relative paths because `rustc` makes no guarantees about the current</span>
 <span class="doccomment">//! directory when it is running a procedural macro.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! You can use environment variable interpolation to remedy this.</span>
+<span class="doccomment">//! Environment variable interpolation can be used to remedy this. You might</span>
+<span class="doccomment">//! want to read the [*Environment Variables*][cargo-vars] section of *The</span>
+<span class="doccomment">//! Cargo Book* for a list of variables provided by `cargo`.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! For example, to include a folder relative to your crate you might use</span>
-<span class="doccomment">//! `include_dir!(&quot;$CARGO_MANIFEST_DIR/assets&quot;).</span>
+<span class="doccomment">//! Most crates will want to use the `$CARGO_MANIFEST_DIR` or `$OUT_DIR`</span>
+<span class="doccomment">//! variables. For example, to include a folder relative to your crate you might</span>
+<span class="doccomment">//! use `include_dir!(&quot;$CARGO_MANIFEST_DIR/assets&quot;)`.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Examples</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Here is an example that embeds the `include_dir` crate&#39;s source code in a</span>
-<span class="doccomment">//! `const` so we can play around with it.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! In general, you should prefer to store the result of `include_dir!()` in a</span>
-<span class="doccomment">//! `static` variable.</span>
+<span class="doccomment">//! `static` so we can play around with it.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! ```rust</span>
 <span class="doccomment">//! use include_dir::{include_dir, Dir};</span>
@@ -157,13 +164,13 @@
 <span class="doccomment">//!</span>
 <span class="doccomment">//! - `glob` - search for files using glob patterns</span>
 <span class="doccomment">//! - `metadata` - include some basic filesystem metadata like last modified</span>
-<span class="doccomment">//!   time. This is not enabled by default to allow for reproducible builds</span>
+<span class="doccomment">//!   time. This is not enabled by default to allow for more reproducible builds</span>
 <span class="doccomment">//!   and to hide potentially identifying information.</span>
 <span class="doccomment">//! - `nightly` - enables nightly APIs like [`track_path`][track-path]</span>
 <span class="doccomment">//!   and  [`proc_macro_tracked_env`][tracked-env]. This gives the compiler</span>
 <span class="doccomment">//!   more information about what is accessed by the procedural macro, enabling</span>
-<span class="doccomment">//!   better caching. Functionality behind this feature flag is unstable and</span>
-<span class="doccomment">//!   may change at any time.</span>
+<span class="doccomment">//!   better caching. **Functionality behind this feature flag is unstable and</span>
+<span class="doccomment">//!   may change or stop compiling at any time.**</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! # Compile Time Considerations</span>
 <span class="doccomment">//!</span>
@@ -172,19 +179,20 @@
 <span class="doccomment">//! as Rust byte strings) and this may have a flow-on effect on the build</span>
 <span class="doccomment">//! process.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! In particular, try to avoid including a large number or files or files which</span>
-<span class="doccomment">//! are particularly big because it may cause the compiler to run out of memory</span>
-<span class="doccomment">//! or spend a large amount of time parsing your code.</span>
+<span class="doccomment">//! In particular, including a large number or files or files which are</span>
+<span class="doccomment">//! particularly big may cause the compiler to use large amounts of RAM or spend</span>
+<span class="doccomment">//! a long time parsing your crate.</span>
 <span class="doccomment">//!</span>
-<span class="doccomment">//! As one data point, this crate&#39;s `target/` directory contained 620</span>
-<span class="doccomment">//! files with a total of 64 MB, with a full build taking about 1.5 seconds and</span>
-<span class="doccomment">//! 200MB of RAM to generate a 7MB binary.</span>
+<span class="doccomment">//! As one data point, this crate&#39;s `target/` directory contained 620 files with</span>
+<span class="doccomment">//! a total of 64 MB, with a full build taking about 1.5 seconds and 200MB of</span>
+<span class="doccomment">//! RAM to generate a 7MB binary.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Using `include_dir!(&quot;target/&quot;)` increased the compile time to 5 seconds</span>
 <span class="doccomment">//! and used 730MB of RAM, generating a 72MB binary.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! [tracked-env]: https://github.com/rust-lang/rust/issues/74690</span>
 <span class="doccomment">//! [track-path]: https://github.com/rust-lang/rust/issues/73921</span>
+<span class="doccomment">//! [cargo-vars]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates</span>
 
 <span class="attribute">#![<span class="ident">deny</span>(
     <span class="ident">elided_lifetimes_in_paths</span>,
@@ -200,11 +208,17 @@
 <span class="kw">mod</span> <span class="ident">dir_entry</span>;
 <span class="kw">mod</span> <span class="ident">file</span>;
 
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;metadata&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;metadata&quot;</span>))]</span>
+<span class="kw">mod</span> <span class="ident">metadata</span>;
+
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glob&quot;</span>)]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glob&quot;</span>))]</span>
 <span class="kw">mod</span> <span class="ident">globs</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;metadata&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::file::Metadata</span>;
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::metadata::Metadata</span>;
+
 <span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">dir::Dir</span>, <span class="ident">dir_entry::DirEntry</span>, <span class="ident">file::File</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">include_dir_macros::include_dir</span>;
 
