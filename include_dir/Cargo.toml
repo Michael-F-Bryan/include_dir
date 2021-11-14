@@ -13,7 +13,7 @@ rust-version = "1.56"
 
 [dependencies]
 glob = { version = "0.3", optional = true }
-include_dir_macros = { version = "0.6.3-dev", path = "../macros" }
+include_dir_macros = { version = "^0.7.0", path = "../macros" }
 
 [dev-dependencies]
 tempdir = "0.3"
