@@ -11,18 +11,6 @@ categories = ["development-tools", "web-programming", "game-engines"]
 edition = "2021"
 rust-version = "1.56"
 
-[package.metadata.docs.rs]
-all-features = true
-
-[badges.appveyor]
-branch = "master"
-repository = "Michael-F-Bryan/include-dir"
-service = "github"
-
-[badges.travis-ci]
-branch = "master"
-repository = "Michael-F-Bryan/include_dir"
-
 [dependencies]
 glob = { version = "0.3", optional = true }
 include_dir_macros = { version = "0.6.3-dev", path = "../macros" }
@@ -34,3 +22,6 @@ tempdir = "0.3"
 default = []
 nightly = ["include_dir_macros/nightly"]
 metadata = ["include_dir_macros/metadata"]
+
+[package.metadata.docs.rs]
+all-features = true

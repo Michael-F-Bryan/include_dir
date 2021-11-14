@@ -5,11 +5,11 @@ use tempdir::TempDir;
 static PARENT_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR");
 
 #[test]
-fn included_all_files() {
+fn included_all_files_in_the_include_dir_crate() {
     let root = Path::new(env!("CARGO_MANIFEST_DIR"));
-    println!("{:#?}", PARENT_DIR);
 
     validate_included(&PARENT_DIR, root, root);
+    assert!(PARENT_DIR.contains("src/lib.rs"));
 }
 
 #[test]

@@ -14,8 +14,8 @@ rust-version = "1.56"
 proc-macro = true
 
 [dependencies]
-proc-macro2 = "1.0.32"
-quote = "1.0.10"
+proc-macro2 = "1"
+quote = "1"
 
 [features]
 nightly = []

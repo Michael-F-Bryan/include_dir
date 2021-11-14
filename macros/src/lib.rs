@@ -1,3 +1,6 @@
+//! Implementation details of the `include_dir`.
+//!
+//! You probably don't want to use this crate directly.
 #![cfg_attr(feature = "nightly", feature(track_path, proc_macro_tracked_env))]
 
 use proc_macro::{TokenStream, TokenTree};
@@ -10,6 +13,7 @@ use std::{
     time::SystemTime,
 };
 
+/// Embed the contents of a directory in your crate.
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
     let tokens: Vec<_> = input.into_iter().collect();
