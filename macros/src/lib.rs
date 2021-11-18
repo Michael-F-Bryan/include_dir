@@ -30,7 +30,7 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
 
 fn unwrap_string_literal(lit: &proc_macro::Literal) -> String {
     let mut repr = lit.to_string();
-    if !repr.starts_with('"') || !repr.starts_with('"') {
+    if !repr.starts_with('"') || !repr.ends_with('"') {
         panic!("This macro only accepts a single, non-empty string argument")
     }
 
