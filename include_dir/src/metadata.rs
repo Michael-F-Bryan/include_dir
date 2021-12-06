@@ -1,28 +1,7 @@
 use std::time::{Duration, SystemTime};
 
-use crate::File;
-
-impl<'a> File<'a> {
-    /// Set the [`Metadata`] associated with a [`File`].
-    pub const fn with_metadata(self, metadata: Metadata) -> Self {
-        let File { path, contents, .. } = self;
-
-        File {
-            path,
-            contents,
-            metadata: Some(metadata),
-        }
-    }
-
-    /// Get the [`File`]'s [`Metadata`], if available.
-    pub fn metadata(&self) -> Option<&Metadata> {
-        self.metadata.as_ref()
-    }
-}
-
 /// Basic metadata for a file.
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[doc(cfg(feature = "metadata"))]
 pub struct Metadata {
     accessed: Duration,
     created: Duration,

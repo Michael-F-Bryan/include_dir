@@ -25,18 +25,48 @@ jobs:
           profile: minimal
           toolchain: ${{ matrix.rust }}
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: Check
+        uses: actions-rs/cargo@v1
         with:
           command: check
           args: --workspace --verbose
-      - uses: actions-rs/cargo@v1
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --workspace --verbose
-      - uses: actions-rs/cargo@v1
+      - name: Test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --workspace --verbose --no-default-features
+      - name: Test (default features)
+        uses: actions-rs/cargo@v1
         with:
           command: test
           args: --workspace --verbose
+      - name: Test (glob feature)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --workspace --verbose --no-default-features --features glob
+      - name: Test (metadata feature)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --workspace --verbose --no-default-features --features metadata
+      - name: Test (nightly feature)
+        uses: actions-rs/cargo@v1
+        if: matrix.rust == 'nightly'
+        with:
+          command: test
+          args: --workspace --verbose --no-default-features --features nightly
+      - name: Test (all features)
+        uses: actions-rs/cargo@v1
+        if: matrix.rust == 'nightly'
+        with:
+          command: test
+          args: --workspace --verbose --all-features
 
   api-docs:
     name: Publish API Docs to GitHub Pages

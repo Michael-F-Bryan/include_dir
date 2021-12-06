@@ -95,11 +95,9 @@ mod dir_entry;
 mod file;
 
 #[cfg(feature = "metadata")]
-#[doc(cfg(feature = "metadata"))]
 mod metadata;
 
 #[cfg(feature = "glob")]
-#[doc(cfg(feature = "glob"))]
 mod globs;
 
 #[cfg(feature = "metadata")]
@@ -108,7 +106,6 @@ pub use crate::metadata::Metadata;
 pub use crate::{dir::Dir, dir_entry::DirEntry, file::File};
 pub use include_dir_macros::include_dir;
 
-// #[cfg(rustdoc)]
 #[doc = include_str!("../README.md")]
 #[allow(dead_code)]
 fn check_readme_examples() {}

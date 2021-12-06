@@ -1,6 +1,3 @@
-#[cfg(feature = "metadata")]
-use std::time::{Duration, SystemTime};
-
 use std::{
     fmt::{self, Debug, Formatter},
     path::Path,
@@ -40,6 +37,25 @@ impl<'a> File<'a> {
     /// The file's contents interpreted as a string.
     pub fn contents_utf8(&self) -> Option<&str> {
         std::str::from_utf8(self.contents()).ok()
+    }
+}
+
+#[cfg(feature = "metadata")]
+impl<'a> File<'a> {
+    /// Set the [`Metadata`] associated with a [`File`].
+    pub const fn with_metadata(self, metadata: crate::Metadata) -> Self {
+        let File { path, contents, .. } = self;
+
+        File {
+            path,
+            contents,
+            metadata: Some(metadata),
+        }
+    }
+
+    /// Get the [`File`]'s [`Metadata`], if available.
+    pub fn metadata(&self) -> Option<&crate::Metadata> {
+        self.metadata.as_ref()
     }
 }
 
