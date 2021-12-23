@@ -3,7 +3,7 @@ use std::fs;
 use std::path::Path;
 
 /// A directory.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Dir<'a> {
     path: &'a str,
     entries: &'a [DirEntry<'a>],

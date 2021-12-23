@@ -4,7 +4,7 @@ use std::{
 };
 
 /// A file with its contents stored in a `&'static [u8]`.
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct File<'a> {
     path: &'a str,
     contents: &'a [u8],

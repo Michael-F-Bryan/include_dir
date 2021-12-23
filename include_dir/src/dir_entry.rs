@@ -2,7 +2,7 @@ use crate::{Dir, File};
 use std::path::Path;
 
 /// A directory entry, roughly analogous to [`std::fs::DirEntry`].
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DirEntry<'a> {
     /// A directory.
     Dir(Dir<'a>),
