@@ -3,6 +3,9 @@ use std::{
     path::Path,
 };
 
+#[cfg(feature = "compress")]
+use lz4_compression::decompress::decompress;
+
 /// A file with its contents stored in a `&'static [u8]`.
 #[derive(Clone, PartialEq, Eq)]
 pub struct File<'a> {
@@ -30,13 +33,27 @@ impl<'a> File<'a> {
     }
 
     /// The file's raw contents.
+    #[cfg(not(feature = "compress"))]
     pub fn contents(&self) -> &[u8] {
         self.contents
     }
 
+    /// The file's uncompressed raw contents.
+    #[cfg(feature = "compress")]
+    pub fn contents(&self) -> Vec<u8> {
+        decompress(self.contents).expect("Embeded file could not be decompressed")
+    }
+
     /// The file's contents interpreted as a string.
+    #[cfg(not(feature = "compress"))]
     pub fn contents_utf8(&self) -> Option<&str> {
         std::str::from_utf8(self.contents()).ok()
+    }
+
+    /// The file's uncompressed contents interpreted as a string.
+    #[cfg(feature = "compress")]
+    pub fn contents_utf8(&self) -> Option<String> {
+        String::from_utf8(self.contents()).ok()
     }
 }
 

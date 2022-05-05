@@ -16,7 +16,9 @@ proc-macro = true
 [dependencies]
 proc-macro2 = "1"
 quote = "1"
+lz4-compression = "0.7.0"
 
 [features]
 nightly = []
 metadata = []
+compress = []
