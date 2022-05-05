@@ -13,6 +13,9 @@ use std::{
     time::SystemTime,
 };
 
+#[cfg(feature = "compress")]
+use lz4_compression::compress::compress;
+
 /// Embed the contents of a directory in your crate.
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
@@ -76,6 +79,10 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
 
 fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     let contents = read_file(path);
+
+    #[cfg(feature = "compress")]
+    let contents = compress(&contents);
+
     let literal = Literal::byte_string(&contents);
 
     let normalized_path = normalize_path(root, path);
