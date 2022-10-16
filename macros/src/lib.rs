@@ -75,8 +75,17 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
 }
 
 fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
-    let contents = read_file(path);
-    let literal = Literal::byte_string(&contents);
+    let abs = path
+        .canonicalize()
+        .unwrap_or_else(|e| panic!("failed to resolve \"{}\": {}", path.display(), e));
+    let literal = match abs.to_str() {
+        Some(abs) => quote!(include_bytes!(#abs)),
+        None => {
+            let contents = read_file(path);
+            let literal = Literal::byte_string(&contents);
+            quote!(#literal)
+        }
+    };
 
     let normalized_path = normalize_path(root, path);
 
@@ -285,7 +294,7 @@ mod tests {
 
         let resolved = resolve_path(path, |name| match name {
             "TOP_LEVEL" => Some("$NESTED".to_string()),
-            "$NESTED" => unreachable!("Shouln't resolve recursively"),
+            "$NESTED" => unreachable!("Shouldn't resolve recursively"),
             _ => unreachable!(),
         })
         .unwrap();
