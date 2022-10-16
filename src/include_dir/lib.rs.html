@@ -1,9 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `include_dir/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../include_dir/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a><h2 class="location"></h2>
-    </nav>
-    <nav class="sidebar"><a class="sidebar-logo" href="../../include_dir/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
-        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../include_dir/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><div class="theme-picker hidden"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="22" height="22" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `include_dir/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><a class="sidebar-logo" href="../../include_dir/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../include_dir/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="src-line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -114,117 +109,116 @@
 <span id="109">109</span>
 <span id="110">110</span>
 <span id="111">111</span>
-</pre><pre class="rust"><code><span class="doccomment">//! An extension to the `include_str!()` and `include_bytes!()` macro for</span>
-<span class="doccomment">//! embedding an entire directory tree into your binary.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Environment Variables</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! When invoking the [`include_dir!()`] macro you should try to avoid using</span>
-<span class="doccomment">//! relative paths because `rustc` makes no guarantees about the current</span>
-<span class="doccomment">//! directory when it is running a procedural macro.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Environment variable interpolation can be used to remedy this. You might</span>
-<span class="doccomment">//! want to read the [*Environment Variables*][cargo-vars] section of *The</span>
-<span class="doccomment">//! Cargo Book* for a list of variables provided by `cargo`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Most crates will want to use the `$CARGO_MANIFEST_DIR` or `$OUT_DIR`</span>
-<span class="doccomment">//! variables. For example, to include a folder relative to your crate you might</span>
-<span class="doccomment">//! use `include_dir!(&quot;$CARGO_MANIFEST_DIR/assets&quot;)`.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Examples</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Here is an example that embeds the `include_dir` crate&#39;s source code in a</span>
-<span class="doccomment">//! `static` so we can play around with it.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! ```rust</span>
-<span class="doccomment">//! use include_dir::{include_dir, Dir};</span>
-<span class="doccomment">//! use std::path::Path;</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! static PROJECT_DIR: Dir&lt;&#39;_&gt; = include_dir!(&quot;$CARGO_MANIFEST_DIR&quot;);</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // of course, you can retrieve a file by its full path</span>
-<span class="doccomment">//! let lib_rs = PROJECT_DIR.get_file(&quot;src/lib.rs&quot;).unwrap();</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // you can also inspect the file&#39;s contents</span>
-<span class="doccomment">//! let body = lib_rs.contents_utf8().unwrap();</span>
-<span class="doccomment">//! assert!(body.contains(&quot;SOME_INTERESTING_STRING&quot;));</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! // if you enable the `glob` feature, you can for files (and directories) using glob patterns</span>
-<span class="doccomment">//! #[cfg(feature = &quot;glob&quot;)]</span>
-<span class="doccomment">//! {</span>
-<span class="doccomment">//!     let glob = &quot;**/*.rs&quot;;</span>
-<span class="doccomment">//!     for entry in PROJECT_DIR.find(glob).unwrap() {</span>
-<span class="doccomment">//!         println!(&quot;Found {}&quot;, entry.path().display());</span>
-<span class="doccomment">//!     }</span>
-<span class="doccomment">//! }</span>
-<span class="doccomment">//! ```</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Features</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! This library exposes a couple feature flags for enabling and disabling extra</span>
-<span class="doccomment">//! functionality. These are:</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! - `glob` - search for files using glob patterns</span>
-<span class="doccomment">//! - `metadata` - include some basic filesystem metadata like last modified</span>
-<span class="doccomment">//!   time. This is not enabled by default to allow for more reproducible builds</span>
-<span class="doccomment">//!   and to hide potentially identifying information.</span>
-<span class="doccomment">//! - `nightly` - enables nightly APIs like [`track_path`][track-path]</span>
-<span class="doccomment">//!   and  [`proc_macro_tracked_env`][tracked-env]. This gives the compiler</span>
-<span class="doccomment">//!   more information about what is accessed by the procedural macro, enabling</span>
-<span class="doccomment">//!   better caching. **Functionality behind this feature flag is unstable and</span>
-<span class="doccomment">//!   may change or stop compiling at any time.**</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! # Compile Time Considerations</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! While the `include_dir!()` macro executes relatively quickly, it expands</span>
-<span class="doccomment">//! to a fairly large amount of code (all your files are essentially embedded</span>
-<span class="doccomment">//! as Rust byte strings) and this may have a flow-on effect on the build</span>
-<span class="doccomment">//! process.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! In particular, including a large number or files or files which are</span>
-<span class="doccomment">//! particularly big may cause the compiler to use large amounts of RAM or spend</span>
-<span class="doccomment">//! a long time parsing your crate.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! As one data point, this crate&#39;s `target/` directory contained 620 files with</span>
-<span class="doccomment">//! a total of 64 MB, with a full build taking about 1.5 seconds and 200MB of</span>
-<span class="doccomment">//! RAM to generate a 7MB binary.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! Using `include_dir!(&quot;target/&quot;)` increased the compile time to 5 seconds</span>
-<span class="doccomment">//! and used 730MB of RAM, generating a 72MB binary.</span>
-<span class="doccomment">//!</span>
-<span class="doccomment">//! [tracked-env]: https://github.com/rust-lang/rust/issues/74690</span>
-<span class="doccomment">//! [track-path]: https://github.com/rust-lang/rust/issues/73921</span>
-<span class="doccomment">//! [cargo-vars]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates</span>
+</pre><pre class="rust"><code><span class="doccomment">//! An extension to the `include_str!()` and `include_bytes!()` macro for
+//! embedding an entire directory tree into your binary.
+//!
+//! # Environment Variables
+//!
+//! When invoking the [`include_dir!()`] macro you should try to avoid using
+//! relative paths because `rustc` makes no guarantees about the current
+//! directory when it is running a procedural macro.
+//!
+//! Environment variable interpolation can be used to remedy this. You might
+//! want to read the [*Environment Variables*][cargo-vars] section of *The
+//! Cargo Book* for a list of variables provided by `cargo`.
+//!
+//! Most crates will want to use the `$CARGO_MANIFEST_DIR` or `$OUT_DIR`
+//! variables. For example, to include a folder relative to your crate you might
+//! use `include_dir!(&quot;$CARGO_MANIFEST_DIR/assets&quot;)`.
+//!
+//! # Examples
+//!
+//! Here is an example that embeds the `include_dir` crate&#39;s source code in a
+//! `static` so we can play around with it.
+//!
+//! ```rust
+//! use include_dir::{include_dir, Dir};
+//! use std::path::Path;
+//!
+//! static PROJECT_DIR: Dir&lt;&#39;_&gt; = include_dir!(&quot;$CARGO_MANIFEST_DIR&quot;);
+//!
+//! // of course, you can retrieve a file by its full path
+//! let lib_rs = PROJECT_DIR.get_file(&quot;src/lib.rs&quot;).unwrap();
+//!
+//! // you can also inspect the file&#39;s contents
+//! let body = lib_rs.contents_utf8().unwrap();
+//! assert!(body.contains(&quot;SOME_INTERESTING_STRING&quot;));
+//!
+//! // if you enable the `glob` feature, you can for files (and directories) using glob patterns
+//! #[cfg(feature = &quot;glob&quot;)]
+//! {
+//!     let glob = &quot;**/*.rs&quot;;
+//!     for entry in PROJECT_DIR.find(glob).unwrap() {
+//!         println!(&quot;Found {}&quot;, entry.path().display());
+//!     }
+//! }
+//! ```
+//!
+//! # Features
+//!
+//! This library exposes a couple feature flags for enabling and disabling extra
+//! functionality. These are:
+//!
+//! - `glob` - search for files using glob patterns
+//! - `metadata` - include some basic filesystem metadata like last modified
+//!   time. This is not enabled by default to allow for more reproducible builds
+//!   and to hide potentially identifying information.
+//! - `nightly` - enables nightly APIs like [`track_path`][track-path]
+//!   and  [`proc_macro_tracked_env`][tracked-env]. This gives the compiler
+//!   more information about what is accessed by the procedural macro, enabling
+//!   better caching. **Functionality behind this feature flag is unstable and
+//!   may change or stop compiling at any time.**
+//!
+//! # Compile Time Considerations
+//!
+//! While the `include_dir!()` macro executes relatively quickly, it expands
+//! to a fairly large amount of code (all your files are essentially embedded
+//! as Rust byte strings) and this may have a flow-on effect on the build
+//! process.
+//!
+//! In particular, including a large number or files or files which are
+//! particularly big may cause the compiler to use large amounts of RAM or spend
+//! a long time parsing your crate.
+//!
+//! As one data point, this crate&#39;s `target/` directory contained 620 files with
+//! a total of 64 MB, with a full build taking about 1.5 seconds and 200MB of
+//! RAM to generate a 7MB binary.
+//!
+//! Using `include_dir!(&quot;target/&quot;)` increased the compile time to 5 seconds
+//! and used 730MB of RAM, generating a 72MB binary.
+//!
+//! [tracked-env]: https://github.com/rust-lang/rust/issues/74690
+//! [track-path]: https://github.com/rust-lang/rust/issues/73921
+//! [cargo-vars]: https://doc.rust-lang.org/cargo/reference/environment-variables.html#environment-variables-cargo-sets-for-crates
 
-<span class="attribute">#![<span class="ident">deny</span>(
-    <span class="ident">elided_lifetimes_in_paths</span>,
-    <span class="ident">future_incompatible</span>,
-    <span class="ident">missing_copy_implementations</span>,
-    <span class="ident">missing_debug_implementations</span>,
-    <span class="ident">missing_docs</span>,
-    <span class="ident">rust_2018_idioms</span>
-)]</span>
-<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>))]</span>
+</span><span class="attribute">#![deny(
+    elided_lifetimes_in_paths,
+    future_incompatible,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms
+)]
+#![cfg_attr(feature = <span class="string">&quot;nightly&quot;</span>, feature(doc_cfg))]
 
-<span class="kw">mod</span> <span class="ident">dir</span>;
-<span class="kw">mod</span> <span class="ident">dir_entry</span>;
-<span class="kw">mod</span> <span class="ident">file</span>;
+</span><span class="kw">mod </span>dir;
+<span class="kw">mod </span>dir_entry;
+<span class="kw">mod </span>file;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;metadata&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">metadata</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;metadata&quot;</span>)]
+</span><span class="kw">mod </span>metadata;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;glob&quot;</span>)]</span>
-<span class="kw">mod</span> <span class="ident">globs</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;glob&quot;</span>)]
+</span><span class="kw">mod </span>globs;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;metadata&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::metadata::Metadata</span>;
+<span class="attribute">#[cfg(feature = <span class="string">&quot;metadata&quot;</span>)]
+</span><span class="kw">pub use </span><span class="kw">crate</span>::metadata::Metadata;
 
-<span class="kw">pub</span> <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">dir::Dir</span>, <span class="ident">dir_entry::DirEntry</span>, <span class="ident">file::File</span>};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">include_dir_macros::include_dir</span>;
+<span class="kw">pub use crate</span>::{dir::Dir, dir_entry::DirEntry, file::File};
+<span class="kw">pub use </span>include_dir_macros::include_dir;
 
-<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]</span>
-<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
-<span class="kw">fn</span> <span class="ident">check_readme_examples</span>() {}
+<span class="attribute">#[doc = <span class="macro">include_str!</span>(<span class="string">&quot;../README.md&quot;</span>)]
+#[allow(dead_code)]
+</span><span class="kw">fn </span>check_readme_examples() {}
 </code></pre></div>
-</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="include_dir" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.62.0-nightly (311e2683e 2022-04-18)" ></div>
-</body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="include_dir" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.66.0-nightly (b8c35ca26 2022-10-15)" ></div></body></html>
