@@ -3,6 +3,17 @@ use std::{
     path::Path,
 };
 
+#[cfg(debug_assertions)]
+use std::{sync::Mutex, collections::HashMap};
+#[cfg(debug_assertions)]
+use once_cell::sync::Lazy;
+
+/// In debug mode, the file is not read when compiling, it is read when it is used, and then placed in this cache.
+#[cfg(debug_assertions)]
+static FILES_CACHE: Lazy<Mutex<HashMap<&'static str, &'static [u8]>>> = Lazy::new(|| {
+    Mutex::new(HashMap::new())
+});
+
 /// A file with its contents stored in a `&'static [u8]`.
 #[derive(Clone, PartialEq, Eq)]
 pub struct File<'a> {
@@ -31,7 +42,20 @@ impl<'a> File<'a> {
 
     /// The file's raw contents.
     pub fn contents(&self) -> &[u8] {
-        self.contents
+        #[cfg(debug_assertions)]
+        {
+            let mut cache = FILES_CACHE.lock().unwrap();
+            if !cache.contains_key(self.path) {
+                let value = Box::leak(std::fs::read(self.path().to_str().unwrap()).unwrap().into_boxed_slice());
+                let key = Box::leak(self.path.to_string().into_boxed_str());
+                cache.insert(key, value);
+            }
+            cache.get(self.path).unwrap()
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            self.contents
+        }
     }
 
     /// The file's contents interpreted as a string.

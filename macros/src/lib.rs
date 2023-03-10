@@ -79,11 +79,21 @@ fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
         .canonicalize()
         .unwrap_or_else(|e| panic!("failed to resolve \"{}\": {}", path.display(), e));
     let literal = match abs.to_str() {
-        Some(abs) => quote!(include_bytes!(#abs)),
+        Some(abs) => {
+            #[cfg(not(debug_assertions))]
+            {quote!(include_bytes!(#abs))}
+            #[cfg(debug_assertions)]
+            {quote!(&[])}
+        },
         None => {
+            #[cfg(not(debug_assertions))]
+            {
             let contents = read_file(path);
             let literal = Literal::byte_string(&contents);
             quote!(#literal)
+            }
+            #[cfg(debug_assertions)]
+            {quote!(&[])}
         }
     };
 
