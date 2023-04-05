@@ -17,11 +17,35 @@ use std::{
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
     let tokens: Vec<_> = input.into_iter().collect();
+    let num_tokens = tokens.len();
 
-    let path = match tokens.as_slice() {
-        [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
-        _ => panic!("This macro only accepts a single, non-empty string argument"),
-    };
+    let literals = tokens
+        .into_iter()
+        .filter_map(|token| {
+            match token {
+                TokenTree::Literal(lit) => Some(lit),
+                TokenTree::Group(group) => {
+                    let inside = group.stream().into_iter().collect::<Vec<_>>();
+
+                    if let [TokenTree::Literal(lit)] = inside.as_slice() {
+                        Some(lit.clone())
+                    } else {
+                        None
+                    }
+                }
+                _ => None,
+            }
+        })
+        .collect::<Vec<_>>();
+
+    if literals.len() != num_tokens {
+        panic!("This macro only accepts a single, non-empty string argument");
+    }
+
+    let path = literals
+        .into_iter()
+        .map(|lit| unwrap_string_literal(&lit))
+        .collect::<String>();
 
     let path = resolve_path(&path, get_env).unwrap();
 
