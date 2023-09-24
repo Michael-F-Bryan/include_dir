@@ -16,12 +16,35 @@ use std::{
 /// Embed the contents of a directory in your crate.
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
-    let tokens: Vec<_> = input.into_iter().collect();
+    let literals = input
+        .into_iter()
+        .map(|token| match token {
+            TokenTree::Literal(lit) => lit,
+            TokenTree::Group(ref group) => {
+                let inside = group.stream().into_iter().collect::<Vec<_>>();
 
-    let path = match tokens.as_slice() {
-        [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
-        _ => panic!("This macro only accepts a single, non-empty string argument"),
-    };
+                if let [TokenTree::Literal(lit)] = inside.as_slice() {
+                    lit.clone()
+                } else {
+                    panic!(
+                        "This macro only accepts string arguments, got unexpected {:?}",
+                        token
+                    );
+                }
+            }
+            _ => {
+                panic!(
+                    "This macro only accepts string arguments, got unexpected {:?}",
+                    token
+                );
+            }
+        })
+        .collect::<Vec<_>>();
+
+    let path = literals
+        .into_iter()
+        .map(|lit| unwrap_string_literal(&lit))
+        .collect::<String>();
 
     let path = resolve_path(&path, get_env).unwrap();
 

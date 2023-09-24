@@ -1,5 +1,5 @@
 [package]
-name = "include_dir_macros"
+name = "comfy_include_dir_macros"
 version = "0.7.3"
 description = "The procedural macro used by include_dir"
 authors = ["Michael Bryan <michaelfbryan@gmail.com>"]

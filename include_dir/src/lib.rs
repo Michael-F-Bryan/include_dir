@@ -104,7 +104,7 @@ mod globs;
 pub use crate::metadata::Metadata;
 
 pub use crate::{dir::Dir, dir_entry::DirEntry, file::File};
-pub use include_dir_macros::include_dir;
+pub use comfy_include_dir_macros::include_dir;
 
 #[doc = include_str!("../README.md")]
 #[allow(dead_code)]
