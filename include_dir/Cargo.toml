@@ -1,6 +1,6 @@
 [package]
 authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
-name = "include_dir"
+name = "comfy_include_dir"
 version = "0.7.3"
 description = "Embed the contents of a directory in your binary"
 license = "MIT"
@@ -13,15 +13,15 @@ rust-version = "1.56"
 
 [dependencies]
 glob = { version = "0.3", optional = true }
-include_dir_macros = { version = "^0.7.0", path = "../macros" }
+comfy_include_dir_macros = { version = "^0.7.0", path = "../macros" }
 
 [dev-dependencies]
 tempfile = "3"
 
 [features]
 default = []
-nightly = ["include_dir_macros/nightly"]
-metadata = ["include_dir_macros/metadata"]
+nightly = ["comfy_include_dir_macros/nightly"]
+metadata = ["comfy_include_dir_macros/metadata"]
 
 [package.metadata.docs.rs]
 all-features = true
