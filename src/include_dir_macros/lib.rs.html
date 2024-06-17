@@ -351,6 +351,9 @@
 <a href="#351" id="351">351</a>
 <a href="#352" id="352">352</a>
 <a href="#353" id="353">353</a>
+<a href="#354" id="354">354</a>
+<a href="#355" id="355">355</a>
+<a href="#356" id="356">356</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! Implementation details of the `include_dir`.
 //!
 //! You probably don't want to use this crate directly.
@@ -423,7 +426,10 @@
     <span class="kw">let </span>path = normalize_path(root, path);
 
     <span class="macro">quote!</span> {
-        include_dir::Dir::new(#path, <span class="kw-2">&amp;</span>[ #(#child_tokens),* ])
+        include_dir::Dir::new(#path, {
+            <span class="kw">const </span>ENTRIES: <span class="kw-2">&amp;</span><span class="lifetime">'static </span>[include_dir::DirEntry&lt;<span class="lifetime">'static</span>&gt;] = <span class="kw-2">&amp;</span>[ #(#child_tokens),<span class="kw-2">*</span>];
+            ENTRIES
+    })
     }
 }
 
