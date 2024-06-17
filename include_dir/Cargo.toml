@@ -13,7 +13,7 @@ version.workspace = true
 
 [dependencies]
 glob = { version = "0.3", optional = true }
-include_dir_macros = { version = "^0.7.0", path = "../macros" }
+include_dir_macros = { version = "^0.7.4", path = "../macros" }
 
 [dev-dependencies]
 tempfile = "3"
