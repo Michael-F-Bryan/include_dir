@@ -57,3 +57,40 @@ fn validate_extracted(dir: &Dir, path: &Path) {
         assert!(file_path.exists());
     }
 }
+
+#[test]
+fn msrv_is_in_sync() {
+    let msrv = (include_str!("../../Cargo.toml"))
+        .lines()
+        .filter_map(|line| line.split_once(" = "))
+        .find_map(|(key, value)| {
+            if key.trim() == "rust-version" {
+                Some(value.trim().trim_matches('"'))
+            } else {
+                None
+            }
+        })
+        .unwrap();
+
+    let toolchain_version = (include_str!("../../.rust-toolchain.toml"))
+        .lines()
+        .filter_map(|line| line.split_once(" = "))
+        .find_map(|(key, value)| {
+            if key.trim() == "channel" {
+                Some(value.trim().trim_matches('"'))
+            } else {
+                None
+            }
+        })
+        .unwrap();
+    assert_eq!(toolchain_version, msrv);
+
+    let workflow_msrv = (include_str!("../../.github/workflows/main.yml"))
+        .lines()
+        .skip_while(|line| line.trim() != "# MSRV")
+        .skip(1)
+        .map(|line| line.trim().trim_start_matches('-').trim().trim_matches('"'))
+        .next()
+        .unwrap();
+    assert_eq!(workflow_msrv, msrv);
+}
