@@ -70,7 +70,10 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
     let path = normalize_path(root, path);
 
     quote! {
-        include_dir::Dir::new(#path, &[ #(#child_tokens),* ])
+        include_dir::Dir::new(#path, {
+            const ENTRIES: &'static [include_dir::DirEntry<'static>] = &[ #(#child_tokens),*];
+            ENTRIES
+    })
     }
 }
 
