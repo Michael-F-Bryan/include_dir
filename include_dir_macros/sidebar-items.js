@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"macro":[["include_dir","Embed the contents of a directory in your crate."]]};
+window.SIDEBAR_ITEMS = {"macro":["include_dir"]};
