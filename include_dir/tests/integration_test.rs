@@ -94,3 +94,13 @@ fn msrv_is_in_sync() {
         .unwrap();
     assert_eq!(workflow_msrv, msrv);
 }
+
+#[test]
+fn include_dir_conditionally() {
+    static CONDITIONAL_PARENT_DIR: Option<Dir<'_>> = if true {
+        Some(include_dir!("$CARGO_MANIFEST_DIR"))
+    } else {
+        None
+    };
+    let _ = CONDITIONAL_PARENT_DIR.as_ref().unwrap();
+}
