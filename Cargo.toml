@@ -1,2 +1,12 @@
 [workspace]
 members = ["include_dir", "macros"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+rust-version = "1.56"
+license = "MIT"
+readme = "README.md"
+version = "0.7.3"
+authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
+repository = "https://github.com/Michael-F-Bryan/include_dir"

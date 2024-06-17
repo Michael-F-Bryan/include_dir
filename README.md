@@ -1,7 +1,7 @@
 # include_dir
 
 [![Continuous Integration](https://github.com/Michael-F-Bryan/include_dir/actions/workflows/main.yml/badge.svg)](https://github.com/Michael-F-Bryan/include_dir/actions/workflows/main.yml)
-[![license](https://img.shields.io/github/license/Michael-F-Bryan/include_dir.svg)](LICENSE)
+[![license](https://img.shields.io/github/license/Michael-F-Bryan/include_dir.svg)](./LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/include_dir.svg)](https://crates.io/crates/include_dir)
 [![Docs.rs](https://docs.rs/include_dir/badge.svg)](https://docs.rs/include_dir/)
 

@@ -1,15 +1,15 @@
 [package]
-authors = ["Michael Bryan <michaelfbryan@gmail.com>"]
 name = "include_dir"
-version = "0.7.3"
 description = "Embed the contents of a directory in your binary"
-license = "MIT"
-readme = "README.md"
 keywords = ["assets", "include", "embed", "dir"]
-repository = "https://github.com/Michael-F-Bryan/include_dir"
 categories = ["development-tools", "web-programming", "game-engines"]
-edition = "2021"
-rust-version = "1.56"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+version.workspace = true
 
 [dependencies]
 glob = { version = "0.3", optional = true }
