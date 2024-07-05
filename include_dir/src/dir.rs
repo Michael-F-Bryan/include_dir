@@ -41,7 +41,7 @@ impl<'a> Dir<'a> {
         let path = path.as_ref();
 
         for entry in self.entries() {
-            if entry.path() == path {
+            if entry.path() == self.path().join(path) {
                 return Some(entry);
             }
 

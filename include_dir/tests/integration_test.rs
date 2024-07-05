@@ -21,6 +21,14 @@ fn extract_all_files() {
     validate_extracted(&PARENT_DIR, root);
 }
 
+#[test]
+fn get_entry_works_properly() {
+    PARENT_DIR.get_dir("src")
+        .expect("is 'src' deleted? please fix this.")
+        .get_entry("lib.rs")
+        .expect("check if 'lib.rs' exists, or the behaviour is not expected.");
+}
+
 // Validates that all files on the filesystem exist in the inclusion
 fn validate_included(dir: &Dir<'_>, path: &Path, root: &Path) {
     for entry in path.read_dir().unwrap() {
