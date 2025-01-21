@@ -30,12 +30,12 @@ impl<'a> File<'a> {
     }
 
     /// The file's raw contents.
-    pub fn contents(&self) -> &[u8] {
+    pub fn contents(&self) -> &'a [u8] {
         self.contents
     }
 
     /// The file's contents interpreted as a string.
-    pub fn contents_utf8(&self) -> Option<&str> {
+    pub fn contents_utf8(&self) -> Option<&'a str> {
         std::str::from_utf8(self.contents()).ok()
     }
 }
