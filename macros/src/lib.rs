@@ -103,8 +103,9 @@ fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
 }
 
 fn metadata(path: &Path) -> Option<proc_macro2::TokenStream> {
-    fn to_unix(t: SystemTime) -> u64 {
-        t.duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs()
+    fn to_unix_nsec(t: SystemTime) -> (u64, u32) {
+        let d = t.duration_since(SystemTime::UNIX_EPOCH).unwrap_or_else(|t|t.duration());
+        (d.as_secs(), d.subsec_nanos())
     }
 
     if !cfg!(feature = "metadata") {
@@ -112,15 +113,15 @@ fn metadata(path: &Path) -> Option<proc_macro2::TokenStream> {
     }
 
     let meta = path.metadata().ok()?;
-    let accessed = meta.accessed().map(to_unix).ok()?;
-    let created = meta.created().map(to_unix).ok()?;
-    let modified = meta.modified().map(to_unix).ok()?;
+    let (accessed_sec, accessed_subsec) = meta.accessed().map(to_unix_nsec).ok()?;
+    let (created_sec, created_subsec) = meta.created().map(to_unix_nsec).ok()?;
+    let (modified_sec, modified_subsec) = meta.modified().map(to_unix_nsec).ok()?;
 
     Some(quote! {
         include_dir::Metadata::new(
-            std::time::Duration::from_secs(#accessed),
-            std::time::Duration::from_secs(#created),
-            std::time::Duration::from_secs(#modified),
+            std::time::Duration::new(#accessed_sec, #accessed_subsec),
+            std::time::Duration::new(#created_sec, #created_subsec),
+            std::time::Duration::new(#modified_sec, #modified_subsec),
         )
     })
 }
