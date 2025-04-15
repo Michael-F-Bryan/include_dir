@@ -33,7 +33,10 @@
 //! let body = lib_rs.contents_utf8().unwrap();
 //! assert!(body.contains("SOME_INTERESTING_STRING"));
 //!
-//! // if you enable the `glob` feature, you can for files (and directories) using glob patterns
+//! // you can filter which files are included using a glob pattern
+//! static RUST_FILES: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR", "**/*.rs");
+//!
+//! // or search for files (and directories) using glob patterns after inclusion
 //! #[cfg(feature = "glob")]
 //! {
 //!     let glob = "**/*.rs";

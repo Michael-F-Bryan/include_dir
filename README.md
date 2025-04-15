@@ -31,6 +31,9 @@ let lib_rs = PROJECT_DIR.get_file("src/lib.rs").unwrap();
 let body = lib_rs.contents_utf8().unwrap();
 assert!(body.contains("SOME_INTERESTING_STRING"));
 
+// you can filter which files are included using a glob pattern
+static RUST_FILES: Dir = include_dir!("$CARGO_MANIFEST_DIR", "**/*.rs");
+
 // you can search for files (and directories) using glob patterns
 #[cfg(feature = "glob")]
 {

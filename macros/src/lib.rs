@@ -12,20 +12,25 @@ use std::{
     path::{Path, PathBuf},
     time::SystemTime,
 };
+use glob::Pattern;
 
 /// Embed the contents of a directory in your crate.
 #[proc_macro]
 pub fn include_dir(input: TokenStream) -> TokenStream {
     let tokens: Vec<_> = input.into_iter().collect();
 
-    let path = match tokens.as_slice() {
-        [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
-        _ => panic!("This macro only accepts a single, non-empty string argument"),
+    let (path, glob_pattern) = match tokens.as_slice() {
+        [TokenTree::Literal(lit)] => (unwrap_string_literal(lit), None),
+        [TokenTree::Literal(lit1), TokenTree::Punct(_), TokenTree::Literal(lit2)] => {
+            (unwrap_string_literal(lit1), Some(unwrap_string_literal(lit2)))
+        }
+        _ => panic!("This macro accepts either a single string argument (directory path) or two string arguments (directory path and glob pattern)"),
     };
 
     let path = resolve_path(&path, get_env).unwrap();
+    let glob_pattern = glob_pattern.map(|p| Pattern::new(&p).expect("Invalid glob pattern"));
 
-    expand_dir(&path, &path).into()
+    expand_dir(&path, &path, glob_pattern.as_ref()).into()
 }
 
 fn unwrap_string_literal(lit: &proc_macro::Literal) -> String {
@@ -40,7 +45,7 @@ fn unwrap_string_literal(lit: &proc_macro::Literal) -> String {
     repr
 }
 
-fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
+fn expand_dir(root: &Path, path: &Path, glob_pattern: Option<&Pattern>) -> proc_macro2::TokenStream {
     let children = read_dir(path).unwrap_or_else(|e| {
         panic!(
             "Unable to read the entries in \"{}\": {}",
@@ -53,15 +58,18 @@ fn expand_dir(root: &Path, path: &Path) -> proc_macro2::TokenStream {
 
     for child in children {
         if child.is_dir() {
-            let tokens = expand_dir(root, &child);
+            let tokens = expand_dir(root, &child, glob_pattern);
             child_tokens.push(quote! {
                 include_dir::DirEntry::Dir(#tokens)
             });
         } else if child.is_file() {
-            let tokens = expand_file(root, &child);
-            child_tokens.push(quote! {
-                include_dir::DirEntry::File(#tokens)
-            });
+            let normalized_path = normalize_path(root, &child);
+            if glob_pattern.map_or(true, |p| p.matches(&normalized_path)) {
+                let tokens = expand_file(root, &child);
+                child_tokens.push(quote! {
+                    include_dir::DirEntry::File(#tokens)
+                });
+            }
         } else {
             panic!("\"{}\" is neither a file nor a directory", child.display());
         }
