@@ -94,3 +94,24 @@ fn msrv_is_in_sync() {
         .unwrap();
     assert_eq!(workflow_msrv, msrv);
 }
+
+#[test]
+fn call_from_other_macro() {
+    macro_rules! call_include_dir {
+        ($path:literal) => {
+            include_dir!($path)
+        };
+    }
+
+    macro_rules! call_include_dir_2 {
+        ($path:literal) => {
+            call_include_dir!($path)
+        };
+    }
+
+    static DIR: Dir<'_> = call_include_dir!("$CARGO_MANIFEST_DIR");
+    static DIR2: Dir<'_> = call_include_dir_2!("$CARGO_MANIFEST_DIR");
+
+    assert!(DIR.contains("src/lib.rs"));
+    assert!(DIR2.contains("src/lib.rs"));
+}

@@ -3,7 +3,7 @@
 //! You probably don't want to use this crate directly.
 #![cfg_attr(feature = "nightly", feature(track_path, proc_macro_tracked_env))]
 
-use proc_macro::{TokenStream, TokenTree};
+use proc_macro::{Delimiter, TokenStream, TokenTree};
 use proc_macro2::Literal;
 use quote::quote;
 use std::{
@@ -20,6 +20,14 @@ pub fn include_dir(input: TokenStream) -> TokenStream {
 
     let path = match tokens.as_slice() {
         [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
+        // Delimiter::None is used when the macro is invoked from another macro
+        [TokenTree::Group(g)] if g.delimiter() == Delimiter::None => {
+            let stream: Vec<_> = g.stream().into_iter().collect();
+            match stream.as_slice() {
+                [TokenTree::Literal(lit)] => unwrap_string_literal(lit),
+                _ => panic!("This macro only accepts a single, non-empty string argument"),
+            }
+        }
         _ => panic!("This macro only accepts a single, non-empty string argument"),
     };
 
