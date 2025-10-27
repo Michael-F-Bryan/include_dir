@@ -82,7 +82,7 @@ fn expand_file(root: &Path, path: &Path) -> proc_macro2::TokenStream {
         .canonicalize()
         .unwrap_or_else(|e| panic!("failed to resolve \"{}\": {}", path.display(), e));
     let literal = match abs.to_str() {
-        Some(abs) => quote!(include_bytes!(#abs)),
+        Some(abs) => quote!(::include_dir::include_bytes_aligned!(8, #abs)),
         None => {
             let contents = read_file(path);
             let literal = Literal::byte_string(&contents);
