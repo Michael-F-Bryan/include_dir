@@ -1,7 +1,7 @@
 //! Implementation details of the `include_dir`.
 //!
 //! You probably don't want to use this crate directly.
-#![cfg_attr(feature = "nightly", feature(track_path, proc_macro_tracked_env))]
+#![cfg_attr(feature = "nightly", feature(proc_macro_tracked_path, proc_macro_tracked_env))]
 
 use proc_macro::{TokenStream, TokenTree};
 use proc_macro2::Literal;
@@ -252,7 +252,7 @@ fn take_while(s: &str, mut predicate: impl FnMut(char) -> bool) -> (&str, &str) 
 
 #[cfg(feature = "nightly")]
 fn get_env(variable: &str) -> Option<String> {
-    proc_macro::tracked_env::var(variable).ok()
+    proc_macro::tracked::env_var(variable).ok()
 }
 
 #[cfg(not(feature = "nightly"))]
@@ -262,7 +262,7 @@ fn get_env(variable: &str) -> Option<String> {
 
 fn track_path(_path: &Path) {
     #[cfg(feature = "nightly")]
-    proc_macro::tracked_path::path(_path.to_string_lossy());
+    proc_macro::tracked::path(_path);
 }
 
 #[cfg(test)]
